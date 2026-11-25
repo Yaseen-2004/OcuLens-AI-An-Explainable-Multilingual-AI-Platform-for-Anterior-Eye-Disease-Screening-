@@ -5,7 +5,7 @@ data/
 *.tar
 
 # Model outputs
-models/checkpoints/
+models/checkpoints/*
 models/exported/
 experiments/runs/
 *.pt
@@ -46,3 +46,22 @@ portal/storage/
 # Large build artefacts
 build_worker/
 *.tar.gz
+
+# Model weights the deployed portal loads (17 files, about 287 MB); all other checkpoints stay local
+!models/checkpoints/keratitis_efficientnet_b0.pt
+!models/checkpoints/keratitis_efficientnet_b0_syn.pt
+!models/checkpoints/keratitis_efficientnet_b0_s1.pt
+!models/checkpoints/keratitis_efficientnet_b0_s2.pt
+!models/checkpoints/keratitis_efficientnet_b0_s3.pt
+!models/checkpoints/keratitis_efficientnet_b0_s4.pt
+!models/checkpoints/keratitis_efficientnet_b0_s5.pt
+!models/checkpoints/keratitis_efficientnet_b0_s6.pt
+!models/checkpoints/keratitis_efficientnet_b0_s7.pt
+!models/checkpoints/keratitis_efficientnet_b0_s8.pt
+!models/checkpoints/keratitis_efficientnet_b0_s9.pt
+!models/checkpoints/keratitis_efficientnet_b0_s10.pt
+!models/checkpoints/ulcer_pattern_efficientnet_b0.pt
+!models/checkpoints/trachoma_tf_efficientnet_b0.pt
+!models/checkpoints/unet_cornea.pt
+!models/checkpoints/eye_reference.npz
+!models/checkpoints/ddpm_keratitis_64.pt

@@ -22,6 +22,14 @@ pydantic>=2
 # Patient assistant (optional at runtime: falls back to templates without an API key)
 anthropic
 
+# Clinic portal (portal/app.py) - also used by the Streamlit Community Cloud deployment
+streamlit>=1.56
+plotly>=6
+reportlab
+edge-tts
+truststore
+qrcode[pil]
+
 # Optional: ONNX export benchmark (scripts/export_onnx.py)
 # onnx
 # onnxruntime
