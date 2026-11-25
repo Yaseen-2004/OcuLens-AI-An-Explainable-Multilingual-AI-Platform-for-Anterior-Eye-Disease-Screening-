@@ -47,7 +47,7 @@ labels, and still need review by native speakers.
 ## Model block diagram
 
 ```mermaid
-flowchart LR
+flowchart TD
     A["Eye photo<br/>(guided camera or upload)"] --> B{"Eye check<br/>(distance to 903 real eye photos)"}
     B -- "not an eye" --> X["Rejected:<br/>please retake"]
     B -- "eye" --> C["Image-quality gate<br/>blur · exposure · glare"]
