@@ -1,0 +1,128 @@
+[
+  {
+    "task": "keratitis",
+    "file": "keratitis_0.png",
+    "true": "Herpes keratitis",
+    "pred": "Other",
+    "conf": 0.698
+  },
+  {
+    "task": "keratitis",
+    "file": "keratitis_1.png",
+    "true": "Other",
+    "pred": "Bacterial keratitis",
+    "conf": 0.668
+  },
+  {
+    "task": "keratitis",
+    "file": "keratitis_2.png",
+    "true": "Bacterial keratitis",
+    "pred": "Other",
+    "conf": 0.602
+  },
+  {
+    "task": "keratitis",
+    "file": "keratitis_3.png",
+    "true": "Herpes keratitis",
+    "pred": "Other",
+    "conf": 0.599
+  },
+  {
+    "task": "keratitis",
+    "file": "keratitis_4.png",
+    "true": "Fungal keratitis",
+    "pred": "Herpes keratitis",
+    "conf": 0.272
+  },
+  {
+    "task": "keratitis",
+    "file": "keratitis_5.png",
+    "true": "Bacterial keratitis",
+    "pred": "Herpes keratitis",
+    "conf": 0.257
+  },
+  {
+    "task": "ulcer_pattern",
+    "file": "ulcer_pattern_0.png",
+    "true": "Grade/TF 1",
+    "pred": "Grade/No",
+    "conf": 0.937
+  },
+  {
+    "task": "ulcer_pattern",
+    "file": "ulcer_pattern_1.png",
+    "true": "Grade/TF 1",
+    "pred": "Grade/No",
+    "conf": 0.869
+  },
+  {
+    "task": "ulcer_pattern",
+    "file": "ulcer_pattern_2.png",
+    "true": "Grade/TF 1",
+    "pred": "Grade 2",
+    "conf": 0.861
+  },
+  {
+    "task": "ulcer_pattern",
+    "file": "ulcer_pattern_3.png",
+    "true": "Grade/TF 1",
+    "pred": "Grade 2",
+    "conf": 0.861
+  },
+  {
+    "task": "ulcer_pattern",
+    "file": "ulcer_pattern_4.png",
+    "true": "Grade/No",
+    "pred": "Grade 2",
+    "conf": 0.424
+  },
+  {
+    "task": "ulcer_pattern",
+    "file": "ulcer_pattern_5.png",
+    "true": "Grade/No",
+    "pred": "Grade/TF 1",
+    "conf": 0.409
+  },
+  {
+    "task": "trachoma_tf",
+    "file": "trachoma_tf_0.png",
+    "true": "Grade/TF 1",
+    "pred": "Grade/No",
+    "conf": 0.976
+  },
+  {
+    "task": "trachoma_tf",
+    "file": "trachoma_tf_1.png",
+    "true": "Grade/No",
+    "pred": "Grade/TF 1",
+    "conf": 0.954
+  },
+  {
+    "task": "trachoma_tf",
+    "file": "trachoma_tf_2.png",
+    "true": "Grade/TF 1",
+    "pred": "Grade/No",
+    "conf": 0.912
+  },
+  {
+    "task": "trachoma_tf",
+    "file": "trachoma_tf_3.png",
+    "true": "Grade/No",
+    "pred": "Grade/TF 1",
+    "conf": 0.89
+  },
+  {
+    "task": "trachoma_tf",
+    "file": "trachoma_tf_4.png",
+    "true": "Grade/No",
+    "pred": "Grade/TF 1",
+    "conf": 0.515
+  },
+  {
+    "task": "trachoma_tf",
+    "file": "trachoma_tf_5.png",
+    "true": "Grade/No",
+    "pred": "Grade/TF 1",
+    "conf": 0.51
+  }
+]

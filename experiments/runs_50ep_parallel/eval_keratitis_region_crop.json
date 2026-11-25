@@ -1,0 +1,108 @@
+{
+  "task": "keratitis",
+  "checkpoint": "models/checkpoints/keratitis_efficientnet_b0_region_crop.pt",
+  "split": "test",
+  "overall": {
+    "n": 429,
+    "accuracy": 0.46853146853146854,
+    "balanced_accuracy": 0.3800223842825267,
+    "macro_f1": 0.3546280706565723,
+    "kappa": 0.18391389595761554,
+    "ece": 0.04923719042664643,
+    "per_class": {
+      "BK": {
+        "sensitivity": 0.2807017543859649,
+        "specificity": 0.8870967741935484,
+        "support": 57
+      },
+      "FK": {
+        "sensitivity": 0.3,
+        "specificity": 0.8704156479217604,
+        "support": 20
+      },
+      "HSK": {
+        "sensitivity": 0.2898550724637681,
+        "specificity": 0.8178694158075601,
+        "support": 138
+      },
+      "other_corneal_abnormalities": {
+        "sensitivity": 0.6495327102803738,
+        "specificity": 0.627906976744186,
+        "support": 214
+      }
+    },
+    "confusion_matrix": [
+      [
+        16,
+        12,
+        11,
+        18
+      ],
+      [
+        5,
+        6,
+        5,
+        4
+      ],
+      [
+        12,
+        28,
+        40,
+        58
+      ],
+      [
+        25,
+        13,
+        37,
+        139
+      ]
+    ],
+    "auroc_macro_ovr": 0.6601779738917434
+  },
+  "conformal": {
+    "target_coverage": 0.95,
+    "coverage": 0.9533799533799534,
+    "mean_set_size": 3.4265734265734267
+  },
+  "referral": {
+    "referral_rate": 0.9766899766899767,
+    "accuracy_all": 0.46853146853146854,
+    "accuracy_kept": 0.9
+  },
+  "subgroups": {
+    "eye": {
+      "L": {
+        "n": 221,
+        "accuracy": 0.4660633484162896,
+        "balanced_accuracy": 0.35668175720992623,
+        "macro_f1": 0.34516356782880475
+      },
+      "R": {
+        "n": 205,
+        "accuracy": 0.47804878048780486,
+        "balanced_accuracy": 0.43610308850791235,
+        "macro_f1": 0.3705818699277722
+      }
+    },
+    "illumination_mode": {
+      "1": {
+        "n": 60,
+        "accuracy": 0.5833333333333334,
+        "balanced_accuracy": 0.2976190476190476,
+        "macro_f1": 0.23809523809523808
+      },
+      "2": {
+        "n": 336,
+        "accuracy": 0.47023809523809523,
+        "balanced_accuracy": 0.4023109243697479,
+        "macro_f1": 0.36415355517789594
+      },
+      "3": {
+        "n": 33,
+        "accuracy": 0.24242424242424243,
+        "balanced_accuracy": 0.2333333333333333,
+        "macro_f1": 0.1977931488801054
+      }
+    }
+  }
+}

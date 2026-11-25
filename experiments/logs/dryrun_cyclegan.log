@@ -1,0 +1,3 @@
+domain A ZEH: 4 train images; domain B AGEH: 4 images (test-site images used: True)
+{"epoch": 1, "loss_g": 16.9551, "loss_d": 1.4153, "seconds": 8.8}
+saved D:\Capston_Project\experiments\dryrun\checkpoints\cyclegan_keratitis_ZEH_to_AGEH.pt; translated 4 training images to D:\Capston_Project\experiments\dryrun\harmonized\keratitis_ZEH_to_AGEH

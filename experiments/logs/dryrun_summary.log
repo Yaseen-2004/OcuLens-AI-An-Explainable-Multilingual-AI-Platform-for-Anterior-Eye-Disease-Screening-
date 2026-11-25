@@ -1,0 +1,19 @@
+# dry run started 2026-11-22 20:58:30
+classifier_image             exit=0    40s
+classifier_resume            exit=0    44s
+classifier_mask_input        exit=0    37s
+classifier_region_crop       exit=0    34s
+classifier_multitask         exit=0    30s
+classifier_ensemble_s1       exit=0    30s
+evaluate_keratitis           exit=0    72s
+explain_mask_input           exit=0    19s
+unet_cornea                  exit=0    24s
+predict_masks                exit=0     8s
+ddpm                         exit=0    17s
+classifier_synthetic         exit=0    33s
+cyclegan                     exit=0    29s
+make_dry_pairs               exit=0     2s
+siamese_change               exit=0    35s
+export_onnx                  exit=0  (rerun after fix: classic exporter + out-dir)
+pipeline_end_to_end          exit=0    17s
+# dry run finished 2026-11-22 21:06:40

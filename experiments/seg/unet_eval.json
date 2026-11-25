@@ -1,0 +1,14 @@
+{
+  "cornea": {
+    "test_images": 102,
+    "dice": 0.9645,
+    "iou": 0.9331,
+    "size": 256
+  },
+  "ulcer": {
+    "test_images": 51,
+    "dice": 0.7867,
+    "iou": 0.6779,
+    "size": 256
+  }
+}

@@ -1,0 +1,199 @@
+{
+  "name": "Keratitis harmonized",
+  "task": "keratitis",
+  "classes": [
+    "BK",
+    "FK",
+    "HSK",
+    "other_corneal_abnormalities"
+  ],
+  "n": 429,
+  "ece": 0.05360860994090012,
+  "calibration": [
+    {
+      "bin_lo": 0.30000000000000004,
+      "bin_hi": 0.4,
+      "conf": 0.3612784445285797,
+      "acc": 0.41025641025641024,
+      "count": 39
+    },
+    {
+      "bin_lo": 0.4,
+      "bin_hi": 0.5,
+      "conf": 0.4516204297542572,
+      "acc": 0.4065934065934066,
+      "count": 91
+    },
+    {
+      "bin_lo": 0.5,
+      "bin_hi": 0.6000000000000001,
+      "conf": 0.5512995719909668,
+      "acc": 0.6111111111111112,
+      "count": 108
+    },
+    {
+      "bin_lo": 0.6000000000000001,
+      "bin_hi": 0.7000000000000001,
+      "conf": 0.6456136107444763,
+      "acc": 0.569620253164557,
+      "count": 79
+    },
+    {
+      "bin_lo": 0.7000000000000001,
+      "bin_hi": 0.8,
+      "conf": 0.7472900748252869,
+      "acc": 0.7931034482758621,
+      "count": 58
+    },
+    {
+      "bin_lo": 0.8,
+      "bin_hi": 0.9,
+      "conf": 0.841274619102478,
+      "acc": 0.813953488372093,
+      "count": 43
+    },
+    {
+      "bin_lo": 0.9,
+      "bin_hi": 1.0,
+      "conf": 0.9367828965187073,
+      "acc": 1.0,
+      "count": 11
+    }
+  ],
+  "referral": [
+    {
+      "threshold": 0.0,
+      "referral_rate": 0.0,
+      "accuracy_kept": 0.5967365967365967,
+      "missed_rate": NaN
+    },
+    {
+      "threshold": 0.05,
+      "referral_rate": 0.0,
+      "accuracy_kept": 0.5967365967365967,
+      "missed_rate": NaN
+    },
+    {
+      "threshold": 0.1,
+      "referral_rate": 0.0,
+      "accuracy_kept": 0.5967365967365967,
+      "missed_rate": NaN
+    },
+    {
+      "threshold": 0.15000000000000002,
+      "referral_rate": 0.0,
+      "accuracy_kept": 0.5967365967365967,
+      "missed_rate": NaN
+    },
+    {
+      "threshold": 0.2,
+      "referral_rate": 0.0,
+      "accuracy_kept": 0.5967365967365967,
+      "missed_rate": NaN
+    },
+    {
+      "threshold": 0.25,
+      "referral_rate": 0.0,
+      "accuracy_kept": 0.5967365967365967,
+      "missed_rate": NaN
+    },
+    {
+      "threshold": 0.30000000000000004,
+      "referral_rate": 0.0,
+      "accuracy_kept": 0.5967365967365967,
+      "missed_rate": NaN
+    },
+    {
+      "threshold": 0.35000000000000003,
+      "referral_rate": 0.03263403263403264,
+      "accuracy_kept": 0.6048192771084338,
+      "missed_rate": NaN
+    },
+    {
+      "threshold": 0.4,
+      "referral_rate": 0.09090909090909094,
+      "accuracy_kept": 0.6153846153846154,
+      "missed_rate": NaN
+    },
+    {
+      "threshold": 0.45,
+      "referral_rate": 0.19580419580419584,
+      "accuracy_kept": 0.6608695652173913,
+      "missed_rate": NaN
+    },
+    {
+      "threshold": 0.5,
+      "referral_rate": 0.303030303030303,
+      "accuracy_kept": 0.6789297658862876,
+      "missed_rate": NaN
+    },
+    {
+      "threshold": 0.55,
+      "referral_rate": 0.42657342657342656,
+      "accuracy_kept": 0.6829268292682927,
+      "missed_rate": NaN
+    },
+    {
+      "threshold": 0.6000000000000001,
+      "referral_rate": 0.5547785547785548,
+      "accuracy_kept": 0.7172774869109948,
+      "missed_rate": NaN
+    },
+    {
+      "threshold": 0.65,
+      "referral_rate": 0.6666666666666667,
+      "accuracy_kept": 0.7832167832167832,
+      "missed_rate": NaN
+    },
+    {
+      "threshold": 0.7000000000000001,
+      "referral_rate": 0.7389277389277389,
+      "accuracy_kept": 0.8214285714285714,
+      "missed_rate": NaN
+    },
+    {
+      "threshold": 0.75,
+      "referral_rate": 0.8088578088578089,
+      "accuracy_kept": 0.8658536585365854,
+      "missed_rate": NaN
+    },
+    {
+      "threshold": 0.8,
+      "referral_rate": 0.8741258741258742,
+      "accuracy_kept": 0.8518518518518519,
+      "missed_rate": NaN
+    },
+    {
+      "threshold": 0.8500000000000001,
+      "referral_rate": 0.9300699300699301,
+      "accuracy_kept": 0.9,
+      "missed_rate": NaN
+    },
+    {
+      "threshold": 0.9,
+      "referral_rate": 0.9743589743589743,
+      "accuracy_kept": 1.0,
+      "missed_rate": NaN
+    },
+    {
+      "threshold": 0.9500000000000001,
+      "referral_rate": 0.993006993006993,
+      "accuracy_kept": 1.0,
+      "missed_rate": NaN
+    },
+    {
+      "threshold": 1.0,
+      "referral_rate": 1.0,
+      "accuracy_kept": NaN,
+      "missed_rate": NaN
+    }
+  ],
+  "per_site": {
+    "AGEH": {
+      "n": 429,
+      "accuracy": 0.5967365967365967,
+      "balanced_accuracy": 0.42211071665347843,
+      "macro_f1": 0.4316947698665453
+    }
+  }
+}

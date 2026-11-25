@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OcuLens-AI - Doctor dashboard</title>
+<style>
+  :root { --navy:#1f3a5f; --bg:#f5f7fa; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; background:var(--bg); color:#1d2329; }
+  header { background:var(--navy); color:#fff; padding:14px 24px; display:flex; justify-content:space-between; align-items:center; }
+  header h1 { margin:0; font-size:20px; } header a { color:#fff; font-size:13px; }
+  main { max-width:1100px; margin:20px auto; padding:0 16px; display:grid; grid-template-columns:1fr 380px; gap:16px; }
+  .card { background:#fff; border-radius:10px; padding:16px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  h2 { font-size:15px; margin:0 0 10px; color:var(--navy); }
+  table { border-collapse:collapse; width:100%; font-size:13px; } td,th { border-bottom:1px solid #e3e7ec; padding:7px; text-align:left; }
+  tr.row { cursor:pointer; } tr.row:hover { background:#eef3f9; }
+  .level { padding:2px 8px; border-radius:10px; font-weight:600; font-size:12px; }
+  .urgent{background:#f8d4d4;color:#8a1f1f}.soon{background:#fdebc8;color:#7a4b00}.refer{background:#e6dcf3;color:#4b2a7a}.routine{background:#d9f0dc;color:#1e5a2a}
+  .stats { display:flex; gap:12px; margin-bottom:12px; } .stat { background:#fff; border-radius:8px; padding:8px 14px; font-size:13px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  .stat b { display:block; font-size:20px; color:var(--navy); }
+  input, select, textarea { width:100%; margin:4px 0 8px; padding:6px; font:inherit; font-size:13px; }
+  button { background:var(--navy); color:#fff; border:0; border-radius:6px; padding:8px 14px; cursor:pointer; margin-right:6px; }
+  button.alt { background:#8a1f1f; } .muted { color:#5b6672; font-size:12px; } pre { white-space:pre-wrap; font-size:12px; }
+  @media (max-width:860px){ main { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header><h1>OcuLens-AI - Doctor dashboard</h1><a href="/">Screening page</a></header>
+<main>
+  <section>
+    <div class="stats" id="stats"></div>
+    <div class="card">
+      <h2>Review queue (urgent first)</h2>
+      <label class="muted"><input type="checkbox" id="routine" style="width:auto"> include routine results</label>
+      <table id="queue"><tr><td class="muted">Loading...</td></tr></table>
+    </div>
+  </section>
+  <section class="card" id="detail"><h2>Scan</h2><p class="muted">Select a scan from the queue.</p></section>
+</main>
+<script>
+function esc(s){ return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+async function load() {
+  const inc = document.getElementById("routine").checked;
+  const d = await (await fetch(`/doctor/queue?include_routine=${inc}`)).json();
+  document.getElementById("stats").innerHTML = Object.entries(d.stats)
+    .map(([k,v]) => `<div class="stat"><b>${v}</b>${esc(k)}</div>`).join("");
+  const rows = d.queue.map(s => `<tr class="row" data-id="${esc(s.scan_id)}">
+      <td><span class="level ${esc(s.triage_level)}">${esc(s.triage_level)}</span></td>
+      <td>${esc(s.top_condition || "-")}</td><td>${s.top_probability == null ? "-" : (s.top_probability*100).toFixed(0)+"%"}</td>
+      <td>${s.uncertain ? "uncertain" : ""}</td><td>${esc(s.patient_ref || "")}</td><td class="muted">${esc(s.created_at)}</td></tr>`).join("");
+  const q = document.getElementById("queue");
+  q.innerHTML = `<tr><th>Triage</th><th>Model finding</th><th>Prob.</th><th></th><th>Patient</th><th>Time</th></tr>` +
+    (rows || `<tr><td colspan="6" class="muted">Nothing waiting for review.</td></tr>`);
+  q.querySelectorAll("tr.row").forEach(tr => tr.onclick = () => show(tr.dataset.id));
+}
+
+async function show(id) {
+  const s = await (await fetch(`/doctor/scan/${encodeURIComponent(id)}`)).json();
+  const r = s.report, f = r.findings[0];
+  const classes = (r.model_info && r.model_info.classes) || [];
+  document.getElementById("detail").innerHTML = `
+    <h2>Scan ${esc(id)} <span class="level ${esc(r.triage.level)}">${esc(r.triage.level)}</span></h2>
+    <p>${esc(r.triage.advice)}</p><p class="muted">${esc(r.triage.reasons.join(" | "))}</p>
+    ${f ? `<p><b>${esc(f.condition)}</b> in ${esc(f.region)} - p=${f.probability.toFixed(2)}; set {${esc(f.prediction_set.join(", "))}};
+       attention in region: ${f.attention_in_region ?? "n/a"}</p>` : `<p class="muted">No model finding.</p>`}
+    <p class="muted">Symptoms: ${esc(Object.entries(r.symptoms).filter(([k,v]) => v).map(([k]) => k).join(", ") || "none")}</p>
+    <h2 style="margin-top:12px">Review</h2>
+    <input id="who" placeholder="Reviewer name">
+    <select id="lab"><option value="">corrected label...</option>${classes.map(c => `<option>${esc(c)}</option>`).join("")}</select>
+    <textarea id="note" rows="2" placeholder="Note (optional)"></textarea>
+    <button id="ok">Confirm</button><button class="alt" id="fix">Correct</button>
+    <p class="muted">Previous reviews: ${s.reviews.length}</p>`;
+  document.getElementById("ok").onclick = () => review(id, "confirm");
+  document.getElementById("fix").onclick = () => review(id, "correct");
+}
+
+async function review(id, decision) {
+  const body = { reviewer: document.getElementById("who").value || "doctor", decision,
+                 doctor_label: document.getElementById("lab").value || null, note: document.getElementById("note").value || null };
+  const r = await fetch(`/doctor/scan/${encodeURIComponent(id)}/review`, { method:"POST",
+            headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
+  if (!r.ok) { alert(await r.text()); return; }
+  document.getElementById("detail").innerHTML = `<h2>Saved</h2><p>${esc(decision)} recorded for ${esc(id)}.</p>`;
+  load();
+}
+document.getElementById("routine").onchange = load;
+load();
+</script>
+</body>
+</html>

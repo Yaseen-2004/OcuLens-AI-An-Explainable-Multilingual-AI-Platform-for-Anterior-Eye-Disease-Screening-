@@ -1,0 +1,26 @@
+# NVIDIA DGX (H200, MIG 1g.18gb slice) - keratitis training log, 18 Nov 2026
+# Copied from the session output; the original file (~/oculens-ai/experiments/trainkerat_pod.out)
+# stayed on the server, which was unreachable afterwards.
+# Task: keratitis, EfficientNet-B0, 224 px, batch 32, 6 loader workers; train=809 val=135 test=429 (test site AGEH)
+# train class counts: {'BK': 80, 'FK': 57, 'HSK': 265, 'other_corneal_abnormalities': 407}
+
+## Attempt 1 (30 epochs planned) - crashed: data loader workers ran out of shared memory
+RuntimeError: unable to write to file </torch_277_2286430031_0>: No space left on device (28)
+# fix: in-memory /dev/shm volume added to every pod
+
+## Attempt 2 (30 epochs planned) - full-size photos enhanced before shrinking
+{"epoch": 1, "train_loss": 2.3146747895902107, "val_balanced_acc": 0.5044620412267472, "seconds": 186.0}
+# stopped to apply the speed fix (shrink to 512 px before enhancement)
+
+## Attempt 3 (30 epochs planned) - with the speed fix
+{"epoch": 1, "train_loss": 2.180507329176324, "val_balanced_acc": 0.38975615887380594, "seconds": 84.7}
+{"epoch": 2, "train_loss": 0.9772165961038639, "val_balanced_acc": 0.41284565108094523, "seconds": 87.9}
+{"epoch": 3, "train_loss": 0.7039018635475739, "val_balanced_acc": 0.30234414278531924, "seconds": 89.0}
+# stopped at your request to restart with 100 epochs; the SSH connection dropped during the restart,
+# so it is unknown whether the 100-epoch run started.
+
+## Update 23 Nov 2026 (server reachable again)
+# The 100-epoch run DID start on 18 Nov and finished at 14:26 (100 of 100 epochs, ~85 s per epoch).
+# Full log: dgx_trainkerat_100ep_2026-11-18.log; result: experiments/runs/dgx_keratitis_efficientnet_b0_20261118-063944/result.json
+# Best validation balanced accuracy 0.586 at epoch 35 (checkpoint kept from that epoch).
+test: n=429 accuracy=0.571 balanced_accuracy=0.422 macro_f1=0.405 kappa=0.316 ece=0.066 auroc_macro_ovr=0.726

@@ -1,0 +1,41 @@
+# Clinical decision rules. These must be reviewed and signed off by the clinical advisor
+# before any real use. Safety overrides always win over the model output.
+
+levels:
+  urgent: "See an eye doctor within 24 hours."
+  soon: "See an eye doctor within the next few weeks."
+  refer: "The result is uncertain. Retake the image or see an eye doctor."
+  routine: "No significant finding. Rescan in 6 to 12 months."
+
+# Symptom combinations that force a level regardless of the image.
+safety_overrides:
+  - name: pain_with_sudden_vision_loss
+    when_all: [pain, sudden_vision_loss]
+    level: urgent
+  - name: post_surgery_pain_or_redness
+    when_all: [recent_eye_surgery]
+    when_any: [pain, redness, discharge, vision_drop]
+    level: urgent
+  - name: chemical_or_injury
+    when_any: [chemical_exposure, eye_injury]
+    level: urgent
+
+# Image findings -> level. Matched on region + condition (+ optional minimum severity).
+finding_rules:
+  - {region: cornea, condition: BK, level: urgent}
+  - {region: cornea, condition: FK, level: urgent}
+  - {region: cornea, condition: HSK, level: urgent}
+  - {region: cornea, condition: ulcer, level: urgent}
+  - {region: cornea, condition: other_corneal_abnormalities, level: soon}
+  - {region: lens, condition: cataract, level: soon}
+  - {region: whole_eye, condition: Cataract, level: soon}
+  - {region: whole_eye, condition: Conjunctivitis, level: soon}
+  - {region: whole_eye, condition: Uveitis, level: urgent}
+  - {region: whole_eye, condition: Eyelid, level: soon}
+  - {region: conjunctiva, condition: trachoma_TF, level: soon}
+
+# Labels that mean "nothing found".
+normal_labels: [Normal, normal, "0"]
+
+# Any of these symptoms with no image finding still means "soon".
+symptoms_needing_review: [pain, blurred_vision, discharge, redness, vision_drop]

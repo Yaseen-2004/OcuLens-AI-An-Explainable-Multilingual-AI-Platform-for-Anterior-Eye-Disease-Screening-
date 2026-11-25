@@ -1,0 +1,198 @@
+{
+  "name": "Ulcer region-crop",
+  "task": "ulcer_pattern",
+  "classes": [
+    "0",
+    "1",
+    "2"
+  ],
+  "n": 102,
+  "ece": 0.09941863575402426,
+  "calibration": [
+    {
+      "bin_lo": 0.30000000000000004,
+      "bin_hi": 0.4,
+      "conf": 0.36761221289634705,
+      "acc": 0.0,
+      "count": 1
+    },
+    {
+      "bin_lo": 0.4,
+      "bin_hi": 0.5,
+      "conf": 0.44130295515060425,
+      "acc": 0.0,
+      "count": 4
+    },
+    {
+      "bin_lo": 0.5,
+      "bin_hi": 0.6000000000000001,
+      "conf": 0.5570241212844849,
+      "acc": 0.4666666666666667,
+      "count": 15
+    },
+    {
+      "bin_lo": 0.6000000000000001,
+      "bin_hi": 0.7000000000000001,
+      "conf": 0.6480289101600647,
+      "acc": 0.5333333333333333,
+      "count": 15
+    },
+    {
+      "bin_lo": 0.7000000000000001,
+      "bin_hi": 0.8,
+      "conf": 0.7592003345489502,
+      "acc": 0.9166666666666666,
+      "count": 12
+    },
+    {
+      "bin_lo": 0.8,
+      "bin_hi": 0.9,
+      "conf": 0.8566315174102783,
+      "acc": 0.875,
+      "count": 16
+    },
+    {
+      "bin_lo": 0.9,
+      "bin_hi": 1.0,
+      "conf": 0.9679125547409058,
+      "acc": 0.8974358974358975,
+      "count": 39
+    }
+  ],
+  "referral": [
+    {
+      "threshold": 0.0,
+      "referral_rate": 0.0,
+      "accuracy_kept": 0.7352941176470589,
+      "missed_rate": 0.21568627450980393
+    },
+    {
+      "threshold": 0.05,
+      "referral_rate": 0.0,
+      "accuracy_kept": 0.7352941176470589,
+      "missed_rate": 0.21568627450980393
+    },
+    {
+      "threshold": 0.1,
+      "referral_rate": 0.0,
+      "accuracy_kept": 0.7352941176470589,
+      "missed_rate": 0.21568627450980393
+    },
+    {
+      "threshold": 0.15000000000000002,
+      "referral_rate": 0.0,
+      "accuracy_kept": 0.7352941176470589,
+      "missed_rate": 0.21568627450980393
+    },
+    {
+      "threshold": 0.2,
+      "referral_rate": 0.0,
+      "accuracy_kept": 0.7352941176470589,
+      "missed_rate": 0.21568627450980393
+    },
+    {
+      "threshold": 0.25,
+      "referral_rate": 0.0,
+      "accuracy_kept": 0.7352941176470589,
+      "missed_rate": 0.21568627450980393
+    },
+    {
+      "threshold": 0.30000000000000004,
+      "referral_rate": 0.0,
+      "accuracy_kept": 0.7352941176470589,
+      "missed_rate": 0.21568627450980393
+    },
+    {
+      "threshold": 0.35000000000000003,
+      "referral_rate": 0.0,
+      "accuracy_kept": 0.7352941176470589,
+      "missed_rate": 0.21568627450980393
+    },
+    {
+      "threshold": 0.4,
+      "referral_rate": 0.009803921568627416,
+      "accuracy_kept": 0.7425742574257426,
+      "missed_rate": 0.19607843137254902
+    },
+    {
+      "threshold": 0.45,
+      "referral_rate": 0.02941176470588236,
+      "accuracy_kept": 0.7575757575757576,
+      "missed_rate": 0.17647058823529413
+    },
+    {
+      "threshold": 0.5,
+      "referral_rate": 0.0490196078431373,
+      "accuracy_kept": 0.7731958762886598,
+      "missed_rate": 0.1568627450980392
+    },
+    {
+      "threshold": 0.55,
+      "referral_rate": 0.10784313725490191,
+      "accuracy_kept": 0.7802197802197802,
+      "missed_rate": 0.13725490196078433
+    },
+    {
+      "threshold": 0.6000000000000001,
+      "referral_rate": 0.196078431372549,
+      "accuracy_kept": 0.8292682926829268,
+      "missed_rate": 0.09803921568627451
+    },
+    {
+      "threshold": 0.65,
+      "referral_rate": 0.27450980392156865,
+      "accuracy_kept": 0.8648648648648649,
+      "missed_rate": 0.0784313725490196
+    },
+    {
+      "threshold": 0.7000000000000001,
+      "referral_rate": 0.3431372549019608,
+      "accuracy_kept": 0.8955223880597015,
+      "missed_rate": 0.0784313725490196
+    },
+    {
+      "threshold": 0.75,
+      "referral_rate": 0.37254901960784315,
+      "accuracy_kept": 0.890625,
+      "missed_rate": 0.0784313725490196
+    },
+    {
+      "threshold": 0.8,
+      "referral_rate": 0.4607843137254902,
+      "accuracy_kept": 0.8909090909090909,
+      "missed_rate": 0.058823529411764705
+    },
+    {
+      "threshold": 0.8500000000000001,
+      "referral_rate": 0.5392156862745099,
+      "accuracy_kept": 0.8936170212765957,
+      "missed_rate": 0.058823529411764705
+    },
+    {
+      "threshold": 0.9,
+      "referral_rate": 0.6176470588235294,
+      "accuracy_kept": 0.8974358974358975,
+      "missed_rate": 0.0392156862745098
+    },
+    {
+      "threshold": 0.9500000000000001,
+      "referral_rate": 0.7254901960784313,
+      "accuracy_kept": 0.9285714285714286,
+      "missed_rate": 0.0196078431372549
+    },
+    {
+      "threshold": 1.0,
+      "referral_rate": 1.0,
+      "accuracy_kept": NaN,
+      "missed_rate": 0.0
+    }
+  ],
+  "per_site": {
+    "ZOC": {
+      "n": 102,
+      "accuracy": 0.7352941176470589,
+      "balanced_accuracy": 0.6101188113572015,
+      "macro_f1": 0.6160457990646669
+    }
+  }
+}

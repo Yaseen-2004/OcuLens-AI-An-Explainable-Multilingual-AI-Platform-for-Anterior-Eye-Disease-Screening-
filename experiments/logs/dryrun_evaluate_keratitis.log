@@ -1,0 +1,21 @@
+C:\Users\USER\AppData\Roaming\Python\Python314\site-packages\sklearn\metrics\_classification.py:2924: UserWarning: y_pred contains classes not in y_true
+  warnings.warn("y_pred contains classes not in y_true")
+C:\Users\USER\AppData\Roaming\Python\Python314\site-packages\sklearn\metrics\_ranking.py:442: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.
+  warnings.warn(
+C:\Users\USER\AppData\Roaming\Python\Python314\site-packages\sklearn\metrics\_classification.py:2924: UserWarning: y_pred contains classes not in y_true
+  warnings.warn("y_pred contains classes not in y_true")
+C:\Users\USER\AppData\Roaming\Python\Python314\site-packages\sklearn\metrics\_ranking.py:442: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.
+  warnings.warn(
+{
+  "conformal": {
+    "target_coverage": 0.95,
+    "coverage": 0.9953379953379954,
+    "mean_set_size": 3.9347319347319347
+  },
+  "referral": {
+    "referral_rate": 1.0,
+    "accuracy_all": 0.2261072261072261,
+    "accuracy_kept": NaN
+  }
+}
+saved D:\Capston_Project\experiments\dryrun\eval_keratitis.json

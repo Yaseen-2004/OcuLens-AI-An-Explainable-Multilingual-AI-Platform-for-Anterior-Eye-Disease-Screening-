@@ -1,0 +1,11 @@
+GPU 0: NVIDIA H200 (UUID: GPU-de71237c-3c59-4b7d-d3c7-2d59470127c2)
+  MIG 1g.18gb     Device  0: (UUID: MIG-a393c945-72ec-5577-8c31-98771dc69a01)
+task=keratitis backbone=efficientnet_b0 device=cuda train=809 val=135 test=429
+train class counts: {'BK': 80, 'FK': 57, 'HSK': 265, 'other_corneal_abnormalities': 407}
+{"epoch": 1, "train_loss": 2.180507329176324, "val_balanced_acc": 0.38975615887380594, "seconds": 84.7}
+{"epoch": 2, "train_loss": 0.9772165961038639, "val_balanced_acc": 0.41284565108094523, "seconds": 87.9}
+{"epoch": 3, "train_loss": 0.7039018635475739, "val_balanced_acc": 0.30234414278531924, "seconds": 89.0}
+{"epoch": 4, "train_loss": 0.6185922400913073, "val_balanced_acc": 0.44020236299648063, "seconds": 89.1}
+{"epoch": 5, "train_loss": 0.43643276513138574, "val_balanced_acc": 0.3822586726998492, "seconds": 83.5}
+{"epoch": 6, "train_loss": 0.3391875994146533, "val_balanced_acc": 0.29465183509301157, "seconds": 83.9}
+{"epoch": 7, "train_loss": 0.29519515205520047, "val_balanced_acc": 0.4491075917546506, "seconds": 86.7}

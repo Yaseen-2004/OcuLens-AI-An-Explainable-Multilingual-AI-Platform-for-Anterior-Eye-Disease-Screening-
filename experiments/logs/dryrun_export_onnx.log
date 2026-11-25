@@ -1,0 +1,5 @@
+D:\Capston_Project\scripts\export_onnx.py:43: DeprecationWarning: You are using the legacy TorchScript-based ONNX export. Starting in PyTorch 2.9, the new torch.export-based ONNX exporter has become the default. Learn more about the new export logic: https://docs.pytorch.org/docs/stable/onnx_export.html. For exporting control flow: https://pytorch.org/tutorials/beginner/onnx/export_control_flow_model_to_onnx_tutorial.html
+  torch.onnx.export(model, x, str(out), dynamo=False, **kw)      # classic exporter, no onnxscript needed
+exported D:\Capston_Project\experiments\dryrun\exported\keratitis_efficientnet_b0.onnx 16.0 MB
+PyTorch CPU: 96.3 ms / image
+ONNX Runtime CPU: 19.1 ms / image; max |diff| vs PyTorch = 5.07e-06

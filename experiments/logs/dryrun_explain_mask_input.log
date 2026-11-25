@@ -1,0 +1,12 @@
+{
+  "task": "ulcer_pattern",
+  "mask": "ulcer",
+  "method": "Grad-CAM++",
+  "n": 4,
+  "mean_attention_in_region": 0.983,
+  "mean_mask_area": 0.96,
+  "share_reliable": 1.0,
+  "pointing_game": 1.0,
+  "mean_deletion_auc": 0.766
+}
+saved D:\Capston_Project\experiments\dryrun\explain_ulcer.json

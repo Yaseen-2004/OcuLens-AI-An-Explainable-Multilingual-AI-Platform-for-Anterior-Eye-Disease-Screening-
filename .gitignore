@@ -1,0 +1,48 @@
+# Patient / research data never goes into git
+datasets/
+data/
+*.zip
+*.tar
+
+# Model outputs
+models/checkpoints/
+models/exported/
+experiments/runs/
+*.pt
+*.pth
+*.onnx
+*.safetensors
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Secrets
+.env
+*.key
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Generated outputs
+experiments/dryrun/
+data/synthetic/
+data/harmonized/
+data/masks/
+models/exported/
+
+# Portal runtime data: patient records, photos, password hashes and the voice cache stay local
+*.db
+portal/storage/
+*.db-journal
+
+# Large build artefacts
+build_worker/
+*.tar.gz

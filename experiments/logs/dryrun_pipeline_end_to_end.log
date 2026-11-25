@@ -1,0 +1,3 @@
+keratitis_efficientnet_b0.pt | triage: refer | finding: ('HSK', 0.533, ['BK', 'FK', 'HSK', 'other_corneal_abnormalities'], 1.0) | overlay: True
+ulcer_pattern_efficientnet_b0_mask_input.pt | triage: soon | finding: ('2', 0.828, ['2'], 1.0) | overlay: True
+ulcer_pattern_efficientnet_b0_multitask.pt | triage: refer | finding: ('2', 0.337, ['0', '1', '2'], 1.0) | overlay: True

@@ -1,0 +1,2 @@
+{"epoch": 1, "val_dice": 0.8519, "seconds": 6.3}
+{"test_dice": 0.8568217158317566, "test_iou": 0.7512816190719604, "checkpoint": "D:\\Capston_Project\\experiments\\dryrun\\checkpoints\\unet_cornea.pt"}

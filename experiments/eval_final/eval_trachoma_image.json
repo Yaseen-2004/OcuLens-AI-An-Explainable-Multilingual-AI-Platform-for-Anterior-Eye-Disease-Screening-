@@ -1,0 +1,49 @@
+{
+  "task": "trachoma_tf",
+  "checkpoint": "models/checkpoints/trachoma_tf_efficientnet_b0.pt",
+  "split": "test",
+  "overall": {
+    "n": 237,
+    "accuracy": 0.8185654008438819,
+    "balanced_accuracy": 0.8143592677345538,
+    "macro_f1": 0.8001176816710798,
+    "kappa": 0.6015560855456074,
+    "ece": 0.05049906878531733,
+    "per_class": {
+      "0": {
+        "sensitivity": 0.8260869565217391,
+        "specificity": 0.8026315789473685,
+        "support": 161
+      },
+      "1": {
+        "sensitivity": 0.8026315789473685,
+        "specificity": 0.8260869565217391,
+        "support": 76
+      }
+    },
+    "confusion_matrix": [
+      [
+        133,
+        28
+      ],
+      [
+        15,
+        61
+      ]
+    ],
+    "auroc": 0.8998038574697614
+  },
+  "conformal": {
+    "target_coverage": 0.95,
+    "coverage": 0.9704641350210971,
+    "mean_set_size": 1.4514767932489452
+  },
+  "referral": {
+    "referral_rate": 0.45147679324894513,
+    "accuracy_all": 0.8185654008438819,
+    "accuracy_kept": 0.9461538461538461,
+    "missed_rate_without_referral": 0.19736842105263158,
+    "missed_rate_with_referral": 0.02631578947368421
+  },
+  "subgroups": {}
+}

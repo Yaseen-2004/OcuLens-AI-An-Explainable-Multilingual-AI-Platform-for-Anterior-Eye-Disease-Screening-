@@ -1,0 +1,61 @@
+{
+  "task": "ulcer_pattern",
+  "checkpoint": "models/checkpoints/ulcer_pattern_efficientnet_b0.pt",
+  "split": "test",
+  "overall": {
+    "n": 102,
+    "accuracy": 0.6666666666666666,
+    "balanced_accuracy": 0.6318435606361302,
+    "macro_f1": 0.6091986723565671,
+    "kappa": 0.46695358130956033,
+    "ece": 0.12557021659963272,
+    "per_class": {
+      "0": {
+        "sensitivity": 0.7254901960784313,
+        "specificity": 0.8627450980392157,
+        "support": 51
+      },
+      "1": {
+        "sensitivity": 0.631578947368421,
+        "specificity": 0.8125,
+        "support": 38
+      },
+      "2": {
+        "sensitivity": 0.5384615384615384,
+        "specificity": 0.8314606741573034,
+        "support": 13
+      }
+    },
+    "confusion_matrix": [
+      [
+        37,
+        7,
+        7
+      ],
+      [
+        6,
+        24,
+        8
+      ],
+      [
+        1,
+        5,
+        7
+      ]
+    ],
+    "auroc_macro_ovr": 0.8155826155396028
+  },
+  "conformal": {
+    "target_coverage": 0.95,
+    "coverage": 0.9509803921568627,
+    "mean_set_size": 2.0588235294117645
+  },
+  "referral": {
+    "referral_rate": 0.803921568627451,
+    "accuracy_all": 0.6666666666666666,
+    "accuracy_kept": 0.8,
+    "missed_rate_without_referral": 0.13725490196078433,
+    "missed_rate_with_referral": 0.0392156862745098
+  },
+  "subgroups": {}
+}

@@ -1,0 +1,15 @@
+task=keratitis backbone=efficientnet_b0 device=cpu train=809 val=135 test=429
+train class counts: {'BK': 80, 'FK': 57, 'HSK': 265, 'other_corneal_abnormalities': 407}
+{"epoch": 1, "train_loss": 2.16191724344296, "val_balanced_acc": 0.4270299145299145, "seconds": 233.0}
+{"epoch": 2, "train_loss": 1.216888085357633, "val_balanced_acc": 0.4084841628959276, "seconds": 248.7}
+{"epoch": 3, "train_loss": 0.7864180228618816, "val_balanced_acc": 0.4644796380090498, "seconds": 234.2}
+{"epoch": 4, "train_loss": 0.5880575300515508, "val_balanced_acc": 0.43098290598290595, "seconds": 660.0}
+{"epoch": 5, "train_loss": 0.46090987962020197, "val_balanced_acc": 0.5374057315233786, "seconds": 228.8}
+{"epoch": 6, "train_loss": 0.38117264091452796, "val_balanced_acc": 0.515428607340372, "seconds": 251.3}
+{"epoch": 7, "train_loss": 0.2873892359371091, "val_balanced_acc": 0.49193061840120667, "seconds": 201.3}
+{"epoch": 8, "train_loss": 0.1924981689023036, "val_balanced_acc": 0.5286010558069382, "seconds": 203.5}
+{"epoch": 9, "train_loss": 0.18119242741313057, "val_balanced_acc": 0.4903154851684263, "seconds": 193.9}
+{"epoch": 10, "train_loss": 0.1945669747087805, "val_balanced_acc": 0.4738122171945701, "seconds": 199.0}
+{"epoch": 11, "train_loss": 0.1687941785247902, "val_balanced_acc": 0.4572272498743087, "seconds": 199.6}
+{"epoch": 12, "train_loss": 0.13089641052377682, "val_balanced_acc": 0.47193313222724986, "seconds": 202.2}
+{"epoch": 13, "train_loss": 0.1166119446220482, "val_balanced_acc": 0.4831259426847662, "seconds": 210.7}

@@ -1,0 +1,5 @@
+task=trachoma_tf variant=image backbone=efficientnet_b0 device=cpu train=24 (synthetic 0) val=8 test=8 epochs=1 patience=6
+train class counts: {'0': 16, '1': 8}
+{"epoch": 1, "train_loss": 1.3336104551951091, "val_balanced_acc": 0.3333333333333333, "seconds": 9.5}
+test: {"n": 8, "accuracy": 0.625, "balanced_accuracy": 0.5666666666666667, "macro_f1": 0.5636363636363637, "kappa": 0.1428571428571429, "ece": 0.07742591202259064, "auroc": 0.6666666666666666}
+saved D:\Capston_Project\experiments\dryrun\checkpoints\trachoma_tf_efficientnet_b0_s1.pt and D:\Capston_Project\experiments\dryrun\runs\trachoma_tf_efficientnet_b0_s1_20261122-210153\result.json

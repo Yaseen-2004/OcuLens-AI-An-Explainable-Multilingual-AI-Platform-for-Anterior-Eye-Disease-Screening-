@@ -1,0 +1,14 @@
+masks missing: train 0/24, val 0/8, test 0/8 (missing -> empty mask / full image)
+task=ulcer_pattern variant=region_crop backbone=efficientnet_b0 device=cpu train=24 (synthetic 0) val=8 test=8 epochs=1 patience=6
+train class counts: {'0': 17, '1': 6, '2': 1}
+C:\Users\USER\AppData\Roaming\Python\Python314\site-packages\sklearn\metrics\_classification.py:2924: UserWarning: y_pred contains classes not in y_true
+  warnings.warn("y_pred contains classes not in y_true")
+C:\Users\USER\AppData\Roaming\Python\Python314\site-packages\sklearn\metrics\_ranking.py:442: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.
+  warnings.warn(
+{"epoch": 1, "train_loss": 0.4518278141816457, "val_balanced_acc": 0.0, "seconds": 9.9}
+C:\Users\USER\AppData\Roaming\Python\Python314\site-packages\sklearn\metrics\_classification.py:2924: UserWarning: y_pred contains classes not in y_true
+  warnings.warn("y_pred contains classes not in y_true")
+C:\Users\USER\AppData\Roaming\Python\Python314\site-packages\sklearn\metrics\_ranking.py:442: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.
+  warnings.warn(
+test: {"n": 8, "accuracy": 0.0, "balanced_accuracy": 0.0, "macro_f1": 0.0, "kappa": NaN, "ece": 0.4317604899406433, "auroc_macro_ovr": NaN}
+saved D:\Capston_Project\experiments\dryrun\checkpoints\ulcer_pattern_efficientnet_b0_region_crop.pt and D:\Capston_Project\experiments\dryrun\runs\ulcer_pattern_efficientnet_b0_region_crop_20261122-210051\result.json

@@ -1,0 +1,63 @@
+{
+  "task": "keratitis",
+  "members": 5,
+  "split": "test",
+  "overall": {
+    "n": 429,
+    "accuracy": 0.5501165501165501,
+    "balanced_accuracy": 0.43828656871760874,
+    "macro_f1": 0.41030656797810255,
+    "kappa": 0.2842149853466238,
+    "ece": 0.12297083392287746,
+    "per_class": {
+      "BK": {
+        "sensitivity": 0.38596491228070173,
+        "specificity": 0.8655913978494624,
+        "support": 57
+      },
+      "FK": {
+        "sensitivity": 0.3,
+        "specificity": 0.9144254278728606,
+        "support": 20
+      },
+      "HSK": {
+        "sensitivity": 0.26811594202898553,
+        "specificity": 0.9381443298969072,
+        "support": 138
+      },
+      "other_corneal_abnormalities": {
+        "sensitivity": 0.7990654205607477,
+        "specificity": 0.5813953488372093,
+        "support": 214
+      }
+    },
+    "confusion_matrix": [
+      [
+        22,
+        11,
+        7,
+        17
+      ],
+      [
+        6,
+        6,
+        3,
+        5
+      ],
+      [
+        16,
+        17,
+        37,
+        68
+      ],
+      [
+        28,
+        7,
+        8,
+        171
+      ]
+    ],
+    "auroc_macro_ovr": 0.720118065826964
+  },
+  "mean_mutual_information": 0.11348583549261093
+}

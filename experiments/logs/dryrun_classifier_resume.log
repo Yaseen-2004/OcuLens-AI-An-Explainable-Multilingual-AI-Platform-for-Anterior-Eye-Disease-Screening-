@@ -1,0 +1,14 @@
+resumed from epoch 1 (best val balanced acc 0.5000)
+task=keratitis variant=image backbone=efficientnet_b0 device=cpu train=24 (synthetic 0) val=8 test=8 epochs=2 patience=6
+train class counts: {'BK': 2, 'FK': 1, 'HSK': 9, 'other_corneal_abnormalities': 12}
+C:\Users\USER\AppData\Roaming\Python\Python314\site-packages\sklearn\metrics\_classification.py:2924: UserWarning: y_pred contains classes not in y_true
+  warnings.warn("y_pred contains classes not in y_true")
+C:\Users\USER\AppData\Roaming\Python\Python314\site-packages\sklearn\metrics\_ranking.py:442: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.
+  warnings.warn(
+{"epoch": 2, "train_loss": 0.0036536330662784167, "val_balanced_acc": 0.75, "seconds": 13.6}
+C:\Users\USER\AppData\Roaming\Python\Python314\site-packages\sklearn\metrics\_classification.py:2924: UserWarning: y_pred contains classes not in y_true
+  warnings.warn("y_pred contains classes not in y_true")
+C:\Users\USER\AppData\Roaming\Python\Python314\site-packages\sklearn\metrics\_ranking.py:442: UndefinedMetricWarning: Only one class is present in y_true. ROC AUC score is not defined in that case.
+  warnings.warn(
+test: {"n": 8, "accuracy": 0.125, "balanced_accuracy": 0.125, "macro_f1": 0.05555555555555555, "kappa": NaN, "ece": 0.38799455389380455, "auroc_macro_ovr": NaN}
+saved D:\Capston_Project\experiments\dryrun\checkpoints\keratitis_efficientnet_b0.pt and D:\Capston_Project\experiments\dryrun\runs\keratitis_efficientnet_b0_20261122-205933\result.json

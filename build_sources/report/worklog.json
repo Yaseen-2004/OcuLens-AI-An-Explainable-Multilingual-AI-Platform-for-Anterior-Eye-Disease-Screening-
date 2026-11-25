@@ -1,0 +1,493 @@
+[
+  [
+    "36",
+    "18 Nov: connected to the NVIDIA DGX",
+    "Logged in to the university head node with the credentials you gave. Found GPUs are only given out as Kubernetes pods. Your quota: 8 CPUs, 16 GiB memory, one MIG 1g.18gb slice of an H200.",
+    "Server access confirmed."
+  ],
+  [
+    "37",
+    "Ran a test pod",
+    "Started a short pod that mounted the project folder and listed the GPU: NVIDIA H200, MIG 1g.18gb. Deleted it afterwards.",
+    "GPU and shared folder work."
+  ],
+  [
+    "38",
+    "Tried downloading data on the server",
+    "Server could reach Figshare and Mendeley pages but not the Amazon S3 hosts that serve the files (DNS failure / 403). Decided to upload the verified archives from the PC by SFTP instead.",
+    "Data must be uploaded."
+  ],
+  [
+    "39",
+    "Fixed a path mistake",
+    "Git Bash rewrote /home/... paths, so the first upload landed in a stray 'D:' folder on the server. Deleted that folder and re-uploaded with path conversion off.",
+    "Clean server folder."
+  ],
+  [
+    "40",
+    "First server outage",
+    "Uploaded 3 of 7 archives at about 11 MB/s, then the server stopped answering on port 22.",
+    "Upload paused."
+  ],
+  [
+    "41",
+    "You asked to stop the NVIDIA work and build the project",
+    "Stopped all server work (no pods were left running) and moved to building the code on the PC.",
+    "Local build."
+  ],
+  [
+    "42",
+    "Checked dataset labels",
+    "Read every label file. Found the Nuclear Cataract download has no LOCS III grades (only an empty Office lock file). Found keratitis file names carry patient ID and eye side, and subfolders 1-3 are illumination modes. Read the SUSTech category sheet (category, type, grade).",
+    "Label facts recorded; report error found."
+  ],
+  [
+    "43",
+    "Saved your commit preference",
+    "You asked that GitHub show only your name. Saved as a standing rule: no Claude co-author lines or AI notes in commits, PRs or code comments.",
+    "Rule stored."
+  ],
+  [
+    "44",
+    "Wrote the project code",
+    "Created the Python package src/oculens: data manifest and leakage-free splits, quality gate, CLAHE and glare removal, timm classifier, U-Net, training loops, focal loss, screening metrics, temperature scaling, conformal prediction, MC dropout, Grad-CAM/Grad-CAM++, anatomy check, triage rules engine, findings schema, guardrails, LLM explanation with offline template, doctor report, end-to-end pipeline, FastAPI backend and web page, scripts, configs and README.",
+    "About 30 source files."
+  ],
+  [
+    "45",
+    "Installed and tested",
+    "Installed requirements on the PC (Python 3.14, CPU PyTorch) and wrote 24 unit tests (quality, splits, triage, uncertainty, assistant, models).",
+    "24 of 24 tests pass."
+  ],
+  [
+    "46",
+    "Built the manifest and splits",
+    "Indexed 7,419 images. Created patient-level splits for 4 tasks; keratitis uses 525 patient groups with hospital AGEH as the test site. A check confirms no group is in two splits.",
+    "data/manifest.csv, data/splits/*.csv."
+  ],
+  [
+    "47",
+    "CPU smoke training",
+    "Ran 1 epoch on 48 images to prove the training loop. The weight download through huggingface_hub failed with an internal error, so the code now loads ImageNet weights from models/pretrained (downloaded directly).",
+    "Loop works: train, calibrate, test, save."
+  ],
+  [
+    "48",
+    "You asked to resume on NVIDIA",
+    "Packed code, splits and weights into one archive and uploaded it; uploaded the remaining dataset archives (8.7 GB); downloaded the timm wheel on the server.",
+    "Everything on the server."
+  ],
+  [
+    "49",
+    "Met the cluster policy",
+    "The cluster rejects pods without a GPU request, so even data preparation must borrow the GPU slice. Fixed how the pod helper passes script arguments.",
+    "Pod helper fixed."
+  ],
+  [
+    "50",
+    "Verified and extracted data on the server",
+    "Keratitis (MD5), eye-disease and nuclear cataract (SHA-256 per file) and the time series all verified and extracted in a pod.",
+    "4 datasets ready on the server."
+  ],
+  [
+    "51",
+    "First GPU training failed, then fixed",
+    "Data loader workers ran out of shared memory (/dev/shm). Added an in-memory /dev/shm volume to every pod.",
+    "Training started."
+  ],
+  [
+    "52",
+    "Made training faster",
+    "Epochs took 186 s because full-size photos were enhanced before shrinking. Images are now shrunk to 512 px first, in training and in the app.",
+    "About 85 s per epoch."
+  ],
+  [
+    "53",
+    "Keratitis training, first epochs",
+    "EfficientNet-B0 on the H200 slice: 809 train, 135 validation, 429 test images. Epochs 1-3 validation balanced accuracy 0.39, 0.41, 0.30.",
+    "Training was learning."
+  ],
+  [
+    "54",
+    "You asked for 100 epochs",
+    "Stopped the 30-epoch run and issued the 100-epoch restart. The server cut the SSH connection mid-command and stayed unreachable (second outage, checked for 50 minutes). It is unknown whether the 100-epoch run started.",
+    "Waiting for access."
+  ],
+  [
+    "55",
+    "Corrected the report",
+    "Fixed the false LOCS III statements in Parts E6, G and H and in DATA_LICENSES.md; tidied the register table.",
+    "Corrections ready."
+  ],
+  [
+    "56",
+    "Progress estimate",
+    "Estimated 20-25 % of the whole project done: most code built, no trained-model results yet, clinical steps not started.",
+    "Told in chat."
+  ],
+  [
+    "57",
+    "You asked to reach 30 %",
+    "Planned work that does not need the server: an image cache for CPU training, three baseline models on the PC, the follow-up module, the doctor dashboard and an explainability evaluation.",
+    "Plan."
+  ],
+  [
+    "58",
+    "Built the image cache",
+    "Wrote scripts/cache_images.py; cached 3,741 images (keratitis, ulcer pattern, trachoma) at 512 px in about 4 minutes. The dataset loader uses the cache automatically.",
+    "CPU training feasible."
+  ],
+  [
+    "59",
+    "Started CPU training",
+    "Launched keratitis training on the PC (EfficientNet-B0, 15 epochs, batch 16, 4 loader workers) in the background at 20:16, using the image cache.",
+    "Running."
+  ],
+  [
+    "60",
+    "Built the follow-up module (Step 10)",
+    "src/oculens/followup: ORB + RANSAC image alignment, change detection (model probability change and image difference after alignment), a Siamese change-network class for later training, rescan scheduling by triage level, post-surgery schedule (days 1, 7, 30) and warning check that alerts the surgeon.",
+    "4 new tests pass."
+  ],
+  [
+    "61",
+    "Built the doctor dashboard (Step 11)",
+    "SQLite store (scans, reviews, audit log); every /analyze result is saved; review queue ordered urgent first; confirm / correct actions; corrections export ordered least-confident first for active learning; dashboard web page at /dashboard.",
+    "2 new API tests pass."
+  ],
+  [
+    "62",
+    "Protected tests from paid API calls",
+    "Tests force the assistant's template mode, so they never call the Anthropic API even if a key is set.",
+    "Safe to run tests anywhere."
+  ],
+  [
+    "63",
+    "Wrote the explainability evaluation (RQ4)",
+    "src/oculens/explain/evaluate.py: attention-in-region on SUSTech cornea or ulcer masks, pointing game and deletion AUC, for Grad-CAM or Grad-CAM++.",
+    "Ready for a trained model."
+  ],
+  [
+    "64",
+    "Measured CPU training speed",
+    "First keratitis epoch on the PC finished at 20:24, about 6.5 minutes per epoch with the cache. 15 epochs end around 21:50.",
+    "Timing known."
+  ],
+  [
+    "65",
+    "Queued the next jobs",
+    "scripts/run_queue.sh runs, one after another once keratitis ends: ulcer-pattern classifier (15 epochs), explainability evaluation on cornea and ulcer masks, trachoma classifier (10 epochs). Each writes its own log in experiments/.",
+    "Queue waiting."
+  ],
+  [
+    "66",
+    "You asked to stop for now",
+    "Stopped the CPU keratitis run (it had saved a best-so-far checkpoint but no test result) and cancelled the queued ulcer, explainability and trachoma jobs. No processes left running on the PC; nothing running on the NVIDIA server is confirmed (server unreachable). Estimated progress about 25 %.",
+    "Paused; resume later."
+  ],
+  [
+    "67",
+    "Made the presentation",
+    "Built a 12-slide PowerPoint (OcuLens-AI_Capstone_Presentation.pptx in Downloads) with pptxgenjs: title with the team, agenda, introduction, main idea, plan, datasets, methodologies, architecture, dataset gallery, triage and safety, progress chart, follow-up and next steps; real dataset images with credits; speaker notes. PowerPoint automation was broken on the PC, so layout was checked with a custom preview renderer; the file passed validation.",
+    "Deck in Downloads."
+  ],
+  [
+    "68",
+    "Resumed on 19 Nov",
+    "The DGX did not answer (port 22 and ping failed). You said not to connect to the DGX, so all remaining work runs on the PC.",
+    "PC only."
+  ],
+  [
+    "69",
+    "Started the full job queue on the PC",
+    "Background queue: keratitis (15 epochs), ulcer pattern (15 epochs), explainability on cornea and ulcer masks, trachoma (10 epochs). 30 of 30 tests passed before starting.",
+    "Running; about 4 hours."
+  ],
+  [
+    "70",
+    "The PC queue stopped",
+    "The background training queue ended with the previous session before finishing; no new results were produced.",
+    "No results yet."
+  ],
+  [
+    "71",
+    "You set the rule: code only",
+    "You chose to finish the remaining code and not start any training until you say so.",
+    "No training runs."
+  ],
+  [
+    "72",
+    "Wrote Step 3 code",
+    "src/oculens/generative: class-conditional DDPM with classifier-free guidance, a training/sampling script that uses only the training split and labels outputs as training-only, a CycleGAN-style harmoniser, and FID + TSTR validation.",
+    "Code ready, not trained."
+  ],
+  [
+    "73",
+    "Wrote ensembles and evaluation",
+    "Seed option for training ensemble members; Ensemble class (mean probability, spread, entropy, mutual information); evaluation script with conformal coverage, referral effect on missed cases (RQ3) and subgroup metrics by site, eye and illumination mode.",
+    "Code ready."
+  ],
+  [
+    "74",
+    "Connected segmentation to the app",
+    "Segmenter wrapper for the U-Net; the pipeline now uses the predicted cornea mask for the anatomy check when a trained U-Net exists.",
+    "Code ready."
+  ],
+  [
+    "75",
+    "Wrote export and follow-up training",
+    "scripts/export_onnx.py (ONNX export, PyTorch vs ONNX Runtime latency and output check); Siamese change-model training script for clinician-labelled scan pairs.",
+    "Code ready."
+  ],
+  [
+    "76",
+    "Tested everything",
+    "Added 7 tests (diffusion, CycleGAN, FID/TSTR, ensemble, referral effect, segmenter, Siamese); fixed two library warnings. 37 of 37 tests pass. Updated requirements, README, report Part J and the presentation.",
+    "Coding part finished; training waits for your go-ahead."
+  ],
+  [
+    "77",
+    "Added the run logs",
+    "Collected every log: unit-test runs, dataset hash checks, the DGX attempts (copied from the session into experiments/logs/dgx_training_2026-11-18.log because the server is not used), and the 19 Nov PC keratitis epoch log (13 of 15 epochs; best validation balanced accuracy 0.537 at epoch 5). Added Part L with tables, an epoch chart and file locations, and rebuilt this PDF.",
+    "Part L; no new runs started."
+  ],
+  [
+    "78",
+    "Checked what training still lacked",
+    "Reviewed the training code against the plan: missing early stopping and resume, synthetic images in training, the RQ1 variants, a CycleGAN training script, and real-data dry runs of the untested scripts.",
+    "Gap list agreed; you asked to complete everything."
+  ],
+  [
+    "79",
+    "Early stopping, resume and dry-run mode",
+    "train_classifier: stops when validation balanced accuracy has not improved for 6 epochs (configurable), saves the full state every epoch so --resume continues an interrupted run, and --dry-run trains 1 epoch on 24 images with all outputs in experiments/dryrun.",
+    "Done."
+  ],
+  [
+    "80",
+    "RQ1 variants",
+    "Option A mask as a 4th input channel, option B crop to the segmented region, option C multitask (condition + severity grade heads, for ulcer pattern). Shared image+mask transforms keep the two aligned; masks come from SUSTech ground truth or U-Net predictions (scripts/predict_masks.py). The app, evaluation and explainability scripts handle every variant.",
+    "Done."
+  ],
+  [
+    "81",
+    "Synthetic and harmonised images in training",
+    "--synthetic / --synthetic-csv add DDPM or CycleGAN images to the training split only. New CycleGAN training script; using the test hospital as the target style needs an explicit flag and is recorded in the checkpoint.",
+    "Done."
+  ],
+  [
+    "82",
+    "Tests",
+    "Added 11 tests for the variants, aligned transforms, model rebuilding and the dataset (masks, severity labels, synthetic paths). 48 of 48 pass.",
+    "Done."
+  ],
+  [
+    "83",
+    "Ready-to-run plan",
+    "scripts/run_full_plan.sh: segmentation, baselines, RQ1 variants, 5-model ensemble, RQ2 synthetic and harmonised runs, RQ4 explanation checks and ONNX export, each logged to experiments/logs with a summary file; skips finished jobs and resumes classifiers. Not started - waits for your go-ahead.",
+    "Ready."
+  ],
+  [
+    "84",
+    "Dry run of every training path",
+    "Ran scripts/dry_run_all.sh: 17 steps, 1 epoch on a few real images each, outputs only in experiments/dryrun. 16 passed first time; ONNX export failed because the new PyTorch exporter needs onnxscript.",
+    "16 of 17, then fixed."
+  ],
+  [
+    "85",
+    "Fixed export and a dry-run leak",
+    "Export now uses the classic exporter (installed onnx and onnxruntime for the check): ONNX Runtime about 19 ms per image vs 96 ms PyTorch, outputs match. The first export had written its throwaway model into models/exported; deleted it and added --out-dir so dry runs stay in experiments/dryrun. Confirmed the real checkpoint (19 Nov) and data folders are unchanged.",
+    "17 of 17 pass."
+  ],
+  [
+    "86",
+    "Report updated",
+    "Part J (variants, 48 tests, new commands), Part L (unit-test history, dry-run log and what each step proved), README, requirements and .gitignore. Everything is ready; real training waits for your go-ahead.",
+    "Ready to start on your word."
+  ],
+  [
+    "87",
+    "Set training length to 10 epochs",
+    "At your request every training job in scripts/run_full_plan.sh now uses 10 epochs (one EPOCHS setting, default 10; covers classifiers, U-Nets, diffusion model and CycleGAN), and the config default for scripts/train.py is 10. Early stopping (patience 6) stays on. Nothing was started.",
+    "Waiting for your go-ahead."
+  ],
+  [
+    "88",
+    "Connected to the DGX again (23 Nov)",
+    "At your request, one port test and one login: the server answered, no pods were running, quota free. Found that the 100-epoch keratitis run from 18 Nov had in fact started and finished all 100 epochs at 14:26.",
+    "Run recovered."
+  ],
+  [
+    "89",
+    "Downloaded the 100-epoch results",
+    "Copied its log, the aborted 30-epoch log, the result file and the checkpoint to the PC under separate names (models/checkpoints/dgx/keratitis_efficientnet_b0_100ep.pt), so the 19 Nov PC checkpoint is untouched. First real test result: balanced accuracy 0.422, AUROC 0.726, accuracy 0.571, kappa 0.316, ECE 0.066 on 429 images from the other hospital; fungal sensitivity 0.05, herpes 0.35, bacterial 0.51, other 0.78. Best validation epoch 35 of 100 (overfitting afterwards).",
+    "Results in Part K, log in L5b."
+  ],
+  [
+    "90",
+    "You said: start training",
+    "Prepared the DGX run: fixed PYTHONPATH handling in the plan scripts, added a detached pod mode (the pod is not tied to the SSH session), and a pod job script that extracts the remaining datasets, builds the image cache and runs scripts/run_full_plan.sh with 10 epochs.",
+    "Ready."
+  ],
+  [
+    "91",
+    "Synced code and started the full plan on the DGX (23 Nov 08:50 IST)",
+    "Uploaded the current code (208 KB); moved the old 100-epoch checkpoint to models/checkpoints/dgx_100ep on the server so it is not overwritten; launched pod 'fullplan' (H200 MIG 1g.18gb, 8 CPU, 16 GiB). In the pod: SUSTech-SYSU and trachoma verified (MD5) and extracted, 7,419 images cached at 512 px, plan started with the cornea U-Net (epoch 1 validation Dice 0.93, 19 s per epoch).",
+    "Training running."
+  ],
+  [
+    "92",
+    "Set GPU batch settings",
+    "The server config kept batch 16 / 2 loader workers because of Windows line endings; fixed on the server copy to batch 32 / 6 workers (applies from the second job onward). A background watcher (one long SSH session) reports when the pod finishes.",
+    "Running."
+  ],
+  [
+    "93",
+    "Moved the remaining CPU steps to the GPU",
+    "You asked to run everything on the GPU. Training already used it; U-Net mask prediction, test evaluation and the explainability evaluation were hard-wired to the CPU. All three now use the GPU when one exists (48 tests still pass) and were uploaded to the server during the run, so every later job uses the GPU. The mask step already running finished on the CPU (not interrupted, to avoid a half-written mask folder). The ONNX export still measures CPU speed on purpose, because clinic computers have no GPU.",
+    "Applied mid-run."
+  ],
+  [
+    "94",
+    "First 10-epoch result (keratitis)",
+    "The keratitis baseline trained on the GPU at about 44 s per epoch; best validation balanced accuracy 0.483 at epoch 4; early stopping triggered at epoch 10. Test (429 images, other hospital): balanced accuracy 0.371, AUROC 0.64, accuracy 0.357, ECE 0.027; sensitivity bacterial 0.56, fungal 0.35, herpes 0.12, other 0.46. Conformal sets averaged 3.6 of 4 classes, so every test case would be referred - the model is not yet confident enough to use alone.",
+    "Weaker than the 100-epoch run overall, better on fungal."
+  ],
+  [
+    "95",
+    "Third connection cutoff (23 Nov, about 09:20)",
+    "After many short status logins the server closed the watcher connection and stopped answering. The training pod is detached, so it should continue. Polling reduced to a port test every 5 minutes; no logins until it answers.",
+    "Training assumed running; results pending."
+  ],
+  [
+    "96",
+    "10-epoch stage results so far",
+    "Before the switch the 10-epoch plan had finished both U-Nets, the keratitis masks, and the keratitis, ulcer-pattern and trachoma baselines with test evaluations (trachoma reached validation balanced accuracy 0.83). The keratitis mask-input model was mid-training.",
+    "Backed up."
+  ],
+  [
+    "97",
+    "You asked to continue to 50 epochs",
+    "Added extension support: --resume with more epochs re-plans the cosine learning-rate schedule and resets early stopping (checked on a dry-run model: 2 -> 4 epochs). Plan: PATIENCE setting (0 = train every epoch), and evaluation / explanation jobs now always re-run so they use the newest models. 48 tests pass.",
+    "Code ready."
+  ],
+  [
+    "98",
+    "Restarted the plan with 50 epochs (23 Nov 09:42 IST)",
+    "Backed up all 10-epoch models, results and the summary on the server (experiments/backup_10ep, models/checkpoints/backup_10ep). Stopped the pod and started it again with EPOCHS=50, PATIENCE=0: U-Nets and masks skipped (done), keratitis continued from epoch 10 (about 48 s per epoch), every later model trains 50 epochs and every evaluation re-runs. Estimated time about 12 hours, finishing around 22:00 IST. Watcher checks every 20 minutes.",
+    "Running."
+  ],
+  [
+    "99",
+    "Parallel run across the 4-person team's own accounts (23 Nov 10:30 IST)",
+    "User confirmed a 4-member capstone team (0034, 0001, 0063, 3007) and asked to run across the team's own accounts. Declined the other 6 accounts. Built an 83 MB worker bundle (code + keratitis 512px cache + ImageNet weights + timm wheel). Re-scoped 0034 to ONLY=seg,baseline,rq1,explain,export (keratitis baseline 50-epoch already done). Offloaded disjoint jobs: 0001 = 5-model ensemble, 0063 = RQ2a diffusion+retrain, 3007 = RQ2b CycleGAN+retrain. All four pods running in parallel; expected finish ~2-2.5 h.",
+    "4 slices training."
+  ],
+  [
+    "100",
+    "Finished the 50-epoch run and split the ulcer variants for speed (23 Nov 14:00 IST)",
+    "The two remaining ulcer RQ1 classifiers (region_crop, multitask) would have run one after the other on 0034 (~88 min). Because two trainings on one GPU slice share the same hardware and are not faster, they were moved onto separate GPUs: a 44 MB bundle (512 px ulcer cache + 712 cornea masks + split) was shipped to the free team accounts, 0034 was freed to finish explanation checks + ONNX export, 0001 ran multitask ulcer and 0063 ran region_crop ulcer. All 50 epochs; verified every cornea mask loaded (0 missing of 508). This cut the final stretch from ~2 h to ~35 min.",
+    "All training complete."
+  ],
+  [
+    "101",
+    "Collected results from all four accounts and merged into report + slides (23 Nov 15:00 IST)",
+    "Downloaded every eval_*.json and explain_*.json into experiments/runs_50ep_parallel (baselines for 3 tasks; keratitis + ulcer RQ1 variants; RQ2a diffusion; RQ4 explanations). Evaluated the two models the plan trains but does not auto-score: the CycleGAN-harmonized classifier (RQ2b, on 0034) and the 5-model deep ensemble (RQ3, on 0001). Added Part K2 to this report (account->job map, full results table, RQ1 read-off, explanation quality, ensemble uncertainty) and updated slide 11 of the deck with the trained-models status and headline numbers.",
+    "Report and deck updated."
+  ],
+  [
+    "102",
+    "Ran the full evaluation process on 0034 GPU (23 Nov 15:30 IST)",
+    "Consolidated all 11 model checkpoints onto 0034 and re-ran every test evaluation on its GPU, writing the complete metric set (accuracy, calibration ECE, 95% conformal coverage, referral/triage effect, subgroup breakdowns). Computed reliability (calibration) and referral curves for four key models with a small curves script. Re-ran the ensemble evaluation correctly (5 members, after a glob that had wrongly pulled in the diffusion/harmonized checkpoints). Added Part M (calibration, referral and fairness) to the report. Found: keratitis test split is single-site (AGEH) so a pure held-out-site test was not possible; domain shift is addressed via the baseline-vs-harmonised comparison. Keratitis baseline is well-calibrated (ECE 0.027); the ensemble lifts balanced accuracy to 0.438.",
+    "Evaluation complete; Part M added."
+  ],
+  [
+    "103",
+    "Built the OcuLens-AI demo portal (Streamlit CRM) (23 Nov, evening)",
+    "Created portal/app.py + portal/db.py: a login/role-based clinical portal (SQLite storage at portal/oculens.db, images under portal/storage). Pages: doctor dashboard, new screening, cases, patients, follow-up, image generation, evaluation, about, users. Screening runs the real oculens pipeline on CPU (quality gate -> cornea U-Net -> EfficientNet-B0 -> conformal referral -> Grad-CAM++) with a layer-by-layer animated reveal. Eye-themed UI (iris palette, gauges, probability bars, status pills, biometric scan animation). Downloaded the required model weights locally to models/checkpoints so it runs offline without the DGX.",
+    "Portal live at localhost:8501."
+  ],
+  [
+    "104",
+    "Wired ensemble, uncertainty, referrals and reporting into the portal (23 Nov, evening)",
+    "Keratitis screening now uses the 5-model deep ensemble (mean of temperature-scaled softmaxes); added the mutual-information disagreement score, logged into each case (cases.mi column + backfill) and flagged when high. Added a Bengaluru referral panel (3 real hospitals per condition with Google Maps links; doctor names are clearly-marked placeholders), appointment-request logging, a follow-up timeline with per-visit change notes, and a per-case PDF report (image + Grad-CAM + result + MI + recommendations + referral list). Seeded demo patients/cases. Added run_portal.bat and PRESENTATION_GUIDE.md.",
+    "All portal coding complete; runs on CPU."
+  ],
+  [
+    "105",
+    "Added bootstrap confidence intervals (evaluation rigor) (23 Nov, evening)",
+    "Re-ran the three headline models on CPU over their full test sets and bootstrapped every metric (1,000 resamples) for 95% CIs: keratitis ensemble bal-acc 0.438 [0.375, 0.507], ulcer mask_input 0.678 [0.568, 0.792], trachoma 0.814 [0.755, 0.862]. Added Part N to the report and a CI table to the portal evaluation page. Interval widths scale with test-set size; overlapping intervals are flagged so variant comparisons are read honestly.",
+    "Part N added."
+  ],
+  [
+    "106",
+    "Added failure-case analysis gallery (23 Nov, evening)",
+    "Collected misclassified test cases (most-confident-mistake first) for keratitis, ulcer and trachoma, each with its Grad-CAM++ heat-map, into experiments/failures. Added Part O (failure analysis) to the report and a gallery to the portal. Confident errors are highlighted as the motivation for the referral gate and the rare-class / multi-site roadmap.",
+    "Part O added."
+  ],
+  [
+    "107",
+    "Final keratitis model-selection sweep (24 Nov)",
+    "Ran three follow-up keratitis experiments in parallel on the team DGX accounts: higher-resolution 320px (0034), a 10-model deep ensemble built from seeds 6-10 (seeds 6-8 on 3007, seed 9 on 0034, seed 10 on 0063), and a diffusion-augmented retrain (0063). Evaluated all on the same held-out test set. Diffusion augmentation won: balanced accuracy 0.488 vs 0.438 for the previous 5-model ensemble, best macro-F1, best calibration (ECE 0.047); it also beat the 10-model ensemble (0.451), and higher resolution did not help (0.409). Results saved to experiments/runs/final_sweep.json."
+  ],
+  [
+    "108",
+    "Promoted diffusion-augmented model into the live portal (24 Nov)",
+    "Wired keratitis_efficientnet_b0_syn.pt in as the lead keratitis classifier (portal load_primary / PRIMARY_CKPT). The deep ensemble is retained only to compute the mutual-information uncertainty shown beside each prediction. Updated the screening UI labels to name the diffusion-augmented model and describe the ensemble as the uncertainty estimator. Smoke-tested the full inference path (prediction + conformal set + referral + Grad-CAM + MI)."
+  ],
+  [
+    "109",
+    "Updated report and deck with the final sweep (24 Nov)",
+    "Added report Part K3 (final model-selection sweep: the four-way keratitis comparison and the selection rationale) and refreshed the deck evaluation slide to show diffusion augmentation beating a 10-model ensemble."
+  ],
+  [
+    "110",
+    "Eye-image gate added to the portal (24 Nov)",
+    "Uploads are now checked before prediction: the image is embedded with the trained EfficientNet and compared with a bank of 903 real eye images from all three tasks (models/checkpoints/eye_reference.npz). If its nearest-reference cosine distance is above 0.60 the portal stops and asks for a clear anterior-eye photo. Real eye images score below 0.53 (99th percentile); blank, noise, white-page and single-colour images score 0.66-0.77 and are blocked. The cornea U-Net could not be used for this because it marks even noise as cornea."
+  ],
+  [
+    "111",
+    "Deck polish and diffusion calibration curve (24 Nov)",
+    "Generated the calibration curve for the deployed diffusion keratitis model (experiments/curves/keratitis_diffusion.json) and put it on the evaluation slide in place of the baseline curve; relabelled the chart and speaker note. Checked the 16-slide deck with python-pptx: the sweep table and headline cards show the right numbers."
+  ],
+  [
+    "112",
+    "Diffusion augmentation tried on the other tasks; GPU access lost (24 Nov)",
+    "Ran the winning diffusion recipe on ulcer pattern (0063), trachoma (0034) and a 2x-synthetic keratitis run (3007) in parallel. Ulcer finished: balanced accuracy 0.646 vs 0.632 image baseline (AUROC 0.871, best seen) but below mask_input 0.678, so mask_input stays the ulcer model. Trachoma and the keratitis scale-up were stopped at epochs 47 and 45 of 60; the PC then left the campus network and the DGX became unreachable. CPU timing on the project PC puts finishing them at about 60 hours versus about 50 minutes on the DGX, so they are deferred until GPU access returns. Added report Part K4."
+  ],
+  [
+    "113",
+    "Portal restarted on the project PC (24 Nov, evening)",
+    "The portal had stopped when the PC moved off the campus network (it only logged deprecation warnings, no error from the app). Restarted it on CPU at http://localhost:8501 (also reachable on the local network at http://192.168.1.3:8501). Checked it with a headless Streamlit test run: the login page renders with no exceptions. The portal runs fully offline, so the demo does not need the DGX or the campus network."
+  ],
+  [
+    "114",
+    "Guided right/left eye capture with focus assistance (24 Nov, evening)",
+    "Replaced the one-shot camera button with a guided capture (portal/eye_capture.py, a Streamlit custom component). In the style of an identity-verification flow it photographs the right eye, then the left, with a guide circle, step chips and a hold-still ring that fills before an automatic capture, followed by Keep/Retake. Focus help: a live focus meter that uses the same measure and threshold as the portal image-quality gate (checked against OpenCV on sample images: within 1.4 percent, same pass/fail every time), focus peaking that paints sharp edges green, and the camera own auto/manual focus, refocus, zoom and torch when the device offers them (most laptop webcams are fixed-focus, so the meter and peaking do the work there). Both eyes are screened one after the other and saved as separate cases tagged right or left; the eye now shows in the case list, case page and PDF. Tested end to end in headless Chrome with a real eye image as the camera feed. Also fixed two older portal bugs found on the way: the Open this case button did nothing, and after any jump between pages the next click sent the user back to the Dashboard."
+  ],
+  [
+    "115",
+    "Final presentation rebuilt with a new design (24 Nov, night)",
+    "Built a new 18-slide deck (Downloads/OcuLens-AI_Final_Presentation.pptx, builder scratchpad/deck/build_final.js) with a new theme taken from the slit-lamp eye exam: deep midnight, cobalt-blue light, fluorescein green-yellow accent, iris amber; Century Schoolbook headings. Motif: a generated digital-iris artwork and round iris-framed images. New content: research questions, training setup on the DGX, results with 95 percent bootstrap intervals (added the deployed diffusion keratitis model: 0.488, CI 0.423-0.553, which overlaps the old ensemble and is reported as promising, not yet significant), RQ1 anatomy charts, real versus diffusion-generated images, explanation quality and confident mistakes, the portal, guided capture and the eye check, limitations and next steps. Removed the proposal-era plan and upcoming-methods slides. Checked with the pptx validator and a Chrome-based layout check for text overflow (none). Portal fixes from the screenshots: the high-disagreement tag (renamed uncertain) no longer breaks across lines, and the confidence gauge no longer clips its 100 label."
+  ],
+  [
+    "116",
+    "Presentation v2: every model and three flow diagrams (24 Nov, night)",
+    "Expanded the deck to 24 slides (Downloads/OcuLens-AI_Final_Presentation_v2.pptx). Added a project-journey diagram showing all 12 steps we took, a model zoo with a card for every model used (four EfficientNet-B0 classifiers in the portal, the 10-seed ensemble, anatomy variants, the 320 px and CycleGAN runs, cornea and ulcer U-Nets, the DDPM, CycleGAN, the trust layer and the two safety gates, each with its role, result and whether it runs in the portal), and a model-flow diagram showing how the models feed each other from data to portal, with untried-in-portal models drawn dashed. Added four section dividers with iris artwork in different eye colours, icons on the research-question slide and fade transitions on every slide. The old Methods slide was folded into the model zoo. U-Net segmentation scores are not shown because the only local value comes from a one-epoch dry run. Checked with the pptx validator and the Chrome layout check (no overflow)."
+  ],
+  [
+    "117",
+    "Resumed GPU runs, ulcer label fix and seed study (25 Nov)",
+    "Back on the campus network, resumed the two stopped runs from their saved epochs on 0034 and 3007: trachoma with 600 diffusion images reached 0.808 (baseline 0.814, no gain) and keratitis with 2,400 diffusion images 0.388 (worse than 0.488: too many rough synthetic images swamped the real ones). Scoring the U-Nets revealed that SUSTech ulcer labels mark the lesion in black, which our code read as background; fixed both readers (48 tests pass), retrained the ulcer U-Net (lesion Dice 0.389 to 0.77-0.79) and redid the explanation check (heat-maps put about 2 percent of their weight on the lesion, which covers 4 percent of the image: they read the cornea but not the lesion). Cornea U-Net Dice 0.965. Seed study on 0063, 0034 and 3007: the winning keratitis recipe gave 0.488, 0.437, 0.408 and 0.361 (mean 0.42 +/- 0.05); a 4-seed diffusion ensemble scores 0.474 [0.405-0.539], above the 10-model ensemble (0.451). Report Parts K4-K6 and the deck updated; a missing report part was recovered from the session history and all build sources copied to D:/Capston_Project/build_sources. All pods deleted."
+  ],
+  [
+    "118",
+    "Sound effects for capture and screening (25 Nov)",
+    "Added sounds synthesized in the browser with the Web Audio API (portal/sfx.py; no audio files, works offline): rising scan ticks while the guided capture holds still, a shutter click on capture, a confirmation chime when a photo is kept, a success chord when both eyes are done, a scan sweep on the scanning steps of the analysis, a chime when a case is saved, and an alert tone when the eye check refuses a non-eye image. A Sound effects switch in the sidebar mutes everything, and the capture panel has its own Sound box. Tested end to end in headless Chrome by reading the page sound log: every sound fired once, in order, with no page errors; test cases were removed afterwards."
+  ],
+  [
+    "119",
+    "AI assistant chatbot with voice (25 Nov)",
+    "Added an AI assistant page to the portal (menu: AI assistant; also an Ask the AI assistant button on every case page). It answers questions about a selected case, eye conditions and how OcuLens works, grounded only in the case facts and a built-in eye-health knowledge base. Two engines: Claude Opus 5.5 through the Anthropic SDK (streamed, low effort, cached system prompt, server-side refusal fallback) when credentials are configured, and an offline rule-based assistant otherwise or if the API fails. Safety: never diagnoses (hedged wording), never names medicines or doses (dose sentences removed), red-flag symptoms trigger an emergency banner with standard first aid. Voice: mic input through the browser speech service (needs internet) and answers read aloud with the computer voices (offline), in English, Hindi, Kannada, Tamil or Telugu; patient-friendly or clinician answer style; quick-question buttons; clear chat; transcript download. 16 new unit tests (64 in total, all passing) and a headless-browser test of the page. No API key is set on the project PC, so the portal currently runs the offline assistant."
+  ]
+]

@@ -1,0 +1,372 @@
+{
+  "summary": {
+    "task": "ulcer_pattern",
+    "mask": "ulcer",
+    "method": "Grad-CAM++",
+    "n": 51,
+    "mean_attention_in_region": 0.979,
+    "mean_mask_area": 0.957,
+    "share_reliable": 1.0,
+    "pointing_game": 1.0,
+    "mean_deletion_auc": 0.399
+  },
+  "per_image": [
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/359.jpg",
+      "ratio": 0.9918789261452157,
+      "pointing_hit": true,
+      "mask_area": 0.9290298150510204,
+      "deletion_auc": 0.1260095887316546
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/369.jpg",
+      "ratio": 0.9941138205537563,
+      "pointing_hit": true,
+      "mask_area": 0.9575693558673469,
+      "deletion_auc": 0.4452251566450286
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/373.jpg",
+      "ratio": 0.9969262175890043,
+      "pointing_hit": true,
+      "mask_area": 0.9921277104591837,
+      "deletion_auc": 0.5847324959933757
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/380.jpg",
+      "ratio": 0.9999985110616297,
+      "pointing_hit": true,
+      "mask_area": 0.9602997448979592,
+      "deletion_auc": 0.03810396220048631
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/390.jpg",
+      "ratio": 0.9990622070927906,
+      "pointing_hit": true,
+      "mask_area": 0.9706632653061225,
+      "deletion_auc": 0.17037938432768
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/393.jpg",
+      "ratio": 0.9582484575827322,
+      "pointing_hit": true,
+      "mask_area": 0.9587651466836735,
+      "deletion_auc": 0.6076924585293455
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/397.jpg",
+      "ratio": 0.9999568311926088,
+      "pointing_hit": true,
+      "mask_area": 0.9952965561224489,
+      "deletion_auc": 0.09460128761129454
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/422.jpg",
+      "ratio": 0.9991053273688492,
+      "pointing_hit": true,
+      "mask_area": 0.9692283163265306,
+      "deletion_auc": 0.21220472450977468
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/427.jpg",
+      "ratio": 0.9830489254715812,
+      "pointing_hit": true,
+      "mask_area": 0.9568319515306123,
+      "deletion_auc": 0.9334587931632997
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/429.jpg",
+      "ratio": 0.9991832073654268,
+      "pointing_hit": true,
+      "mask_area": 0.9630899234693877,
+      "deletion_auc": 0.12025119164703713
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/439.jpg",
+      "ratio": 0.9938586016461723,
+      "pointing_hit": true,
+      "mask_area": 0.9458705357142857,
+      "deletion_auc": 0.15035963556867954
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/442.jpg",
+      "ratio": 0.9861645212796658,
+      "pointing_hit": true,
+      "mask_area": 0.9261599170918368,
+      "deletion_auc": 0.5206388313208856
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/446.jpg",
+      "ratio": 0.9984725066122844,
+      "pointing_hit": true,
+      "mask_area": 0.9474449936224489,
+      "deletion_auc": 0.2282363111880983
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/449.jpg",
+      "ratio": 0.9993735985887607,
+      "pointing_hit": true,
+      "mask_area": 0.9814453125,
+      "deletion_auc": 0.13485861211440842
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/475.jpg",
+      "ratio": 0.9496257523988824,
+      "pointing_hit": true,
+      "mask_area": 0.9456911670918368,
+      "deletion_auc": 0.20195720876729195
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/483.jpg",
+      "ratio": 0.9826460292492051,
+      "pointing_hit": true,
+      "mask_area": 0.9727359693877551,
+      "deletion_auc": 0.5288426519924543
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/501.jpg",
+      "ratio": 0.9328344612271027,
+      "pointing_hit": true,
+      "mask_area": 0.9793726084183674,
+      "deletion_auc": 0.11598151653633977
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/504.jpg",
+      "ratio": 0.9947760615795697,
+      "pointing_hit": true,
+      "mask_area": 0.9949577487244898,
+      "deletion_auc": 0.27642707279815115
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/530.jpg",
+      "ratio": 0.9982568754597523,
+      "pointing_hit": true,
+      "mask_area": 0.9820033482142857,
+      "deletion_auc": 0.14003705426003185
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/532.jpg",
+      "ratio": 0.9853130538097,
+      "pointing_hit": true,
+      "mask_area": 0.9035594706632653,
+      "deletion_auc": 0.4956271886367177
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/533.jpg",
+      "ratio": 0.9684383799598517,
+      "pointing_hit": true,
+      "mask_area": 0.9541613520408163,
+      "deletion_auc": 0.2630056575673109
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/538.jpg",
+      "ratio": 0.9999997830984217,
+      "pointing_hit": true,
+      "mask_area": 0.9964126275510204,
+      "deletion_auc": 0.9667421072721482
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/542.jpg",
+      "ratio": 0.9996143874670377,
+      "pointing_hit": true,
+      "mask_area": 0.9958545918367347,
+      "deletion_auc": 0.06230960345816641
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/546.jpg",
+      "ratio": 0.9712766481588178,
+      "pointing_hit": true,
+      "mask_area": 0.8961854272959183,
+      "deletion_auc": 0.18601343501918574
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/549.jpg",
+      "ratio": 0.9843642354943872,
+      "pointing_hit": true,
+      "mask_area": 0.9711615114795918,
+      "deletion_auc": 0.4218746117783384
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/554.jpg",
+      "ratio": 0.9987698107292052,
+      "pointing_hit": true,
+      "mask_area": 0.9079041772959183,
+      "deletion_auc": 0.25466558689222457
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/555.jpg",
+      "ratio": 0.9962795305642217,
+      "pointing_hit": true,
+      "mask_area": 0.9945790816326531,
+      "deletion_auc": 0.9915715545415879
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/556.jpg",
+      "ratio": 0.9224595304936449,
+      "pointing_hit": true,
+      "mask_area": 0.9629304846938775,
+      "deletion_auc": 0.7137992531061174
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/567.jpg",
+      "ratio": 0.9999999138578808,
+      "pointing_hit": true,
+      "mask_area": 0.9991828762755102,
+      "deletion_auc": 0.9771340191364288
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/578.jpg",
+      "ratio": 0.9929474505511072,
+      "pointing_hit": true,
+      "mask_area": 0.9904336734693877,
+      "deletion_auc": 0.24492942749385463
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/584.jpg",
+      "ratio": 0.9935920557824592,
+      "pointing_hit": true,
+      "mask_area": 0.993781887755102,
+      "deletion_auc": 0.7594061474781483
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/587.jpg",
+      "ratio": 0.9878969662142986,
+      "pointing_hit": true,
+      "mask_area": 0.9481823979591837,
+      "deletion_auc": 0.12706404970880483
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/590.jpg",
+      "ratio": 0.9868453585818718,
+      "pointing_hit": true,
+      "mask_area": 0.9781768176020408,
+      "deletion_auc": 0.2730594069729856
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/595.jpg",
+      "ratio": 0.9988251824079533,
+      "pointing_hit": true,
+      "mask_area": 0.9855110012755102,
+      "deletion_auc": 0.6184440508484841
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/598.jpg",
+      "ratio": 0.9851049112144672,
+      "pointing_hit": true,
+      "mask_area": 0.9894371811224489,
+      "deletion_auc": 0.18001367937686188
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/608.jpg",
+      "ratio": 0.9999999273713122,
+      "pointing_hit": true,
+      "mask_area": 0.9996811224489796,
+      "deletion_auc": 0.9288178086280823
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/609.jpg",
+      "ratio": 1.0,
+      "pointing_hit": true,
+      "mask_area": 0.9956353635204082,
+      "deletion_auc": 0.14257904184084966
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/620.jpg",
+      "ratio": 0.9984419186965047,
+      "pointing_hit": true,
+      "mask_area": 0.9826411033163265,
+      "deletion_auc": 0.16991882699489855
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/631.jpg",
+      "ratio": 0.9999116554683463,
+      "pointing_hit": true,
+      "mask_area": 0.9988440688775511,
+      "deletion_auc": 0.4100941333497758
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/644.jpg",
+      "ratio": 0.819946292646281,
+      "pointing_hit": true,
+      "mask_area": 0.7658641581632653,
+      "deletion_auc": 0.7176408439874649
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/653.jpg",
+      "ratio": 0.9311122552574024,
+      "pointing_hit": true,
+      "mask_area": 0.9016661352040817,
+      "deletion_auc": 0.15323264877081658
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/659.jpg",
+      "ratio": 0.8951208079949903,
+      "pointing_hit": true,
+      "mask_area": 0.8384088010204082,
+      "deletion_auc": 0.66704634437574
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/663.jpg",
+      "ratio": 0.9843927077256759,
+      "pointing_hit": true,
+      "mask_area": 0.9897361288265306,
+      "deletion_auc": 0.2105605542467086
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/666.jpg",
+      "ratio": 0.997565760567877,
+      "pointing_hit": true,
+      "mask_area": 0.9762436224489796,
+      "deletion_auc": 0.19649073826149108
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/667.jpg",
+      "ratio": 0.9701384459681507,
+      "pointing_hit": true,
+      "mask_area": 0.9079041772959183,
+      "deletion_auc": 0.749691923544151
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/689.jpg",
+      "ratio": 0.9972459956737081,
+      "pointing_hit": true,
+      "mask_area": 0.9795121173469388,
+      "deletion_auc": 0.851622250676155
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/694.jpg",
+      "ratio": 0.9145485875026904,
+      "pointing_hit": true,
+      "mask_area": 0.8729272959183674,
+      "deletion_auc": 0.4781884909376291
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/695.jpg",
+      "ratio": 0.9902594997274132,
+      "pointing_hit": true,
+      "mask_area": 0.9779974489795918,
+      "deletion_auc": 0.43992186149334883
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/701.jpg",
+      "ratio": 0.9938853763265063,
+      "pointing_hit": true,
+      "mask_area": 0.9148198341836735,
+      "deletion_auc": 0.13426240747362625
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/705.jpg",
+      "ratio": 0.9251678365005949,
+      "pointing_hit": true,
+      "mask_area": 0.9504145408163265,
+      "deletion_auc": 0.5217096228152553
+    },
+    {
+      "image": "sustech_sysu_corneal_ulcer/raw/rawImages/706.jpg",
+      "ratio": 0.9878527293876911,
+      "pointing_hit": true,
+      "mask_area": 0.9730747767857143,
+      "deletion_auc": 0.40940335481393797
+    }
+  ]
+}

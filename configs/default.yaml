@@ -1,0 +1,82 @@
+# OcuLens-AI default configuration.
+# Paths are relative to the project root unless absolute.
+
+paths:
+  datasets_root: datasets            # D:\Capston_Project\datasets
+  manifest: data/manifest.csv
+  splits_dir: data/splits
+  cache_dir: data/cache              # downscaled copies made by scripts/cache_images.py
+  masks_dir: data/masks              # U-Net predicted region masks (scripts/predict_masks.py)
+  runs_dir: experiments/runs
+  checkpoints_dir: models/checkpoints
+
+quality:
+  blur_min_laplacian_var: 60.0       # below this the image is too blurred
+  brightness_min: 40.0               # mean grey level (0-255)
+  brightness_max: 225.0
+  glare_max_fraction: 0.08           # share of near-white specular pixels
+  contrast_min_std: 18.0
+
+preprocessing:
+  image_size: 224
+  work_size: 512                     # photos are downscaled to this long side before enhancement
+  clahe_clip_limit: 2.0
+  clahe_tile_grid: 8
+  remove_glare: true
+
+training:
+  backbone: efficientnet_b0          # small enough to train on a CPU
+  pretrained: true
+  epochs: 10                         # default for scripts/train.py; run_full_plan.sh also uses 10
+  batch_size: 16
+  lr: 0.0003
+  weight_decay: 0.0001
+  loss: focal                        # focal | ce
+  focal_gamma: 2.0
+  num_workers: 2
+  seed: 42
+  dropout: 0.3
+  patience: 6                        # early stopping on validation balanced accuracy (0 = off)
+  aux_weight: 0.5                    # weight of the severity head in the multitask variant
+
+uncertainty:
+  conformal_alpha: 0.05              # 95 percent target coverage
+  mc_dropout_passes: 10
+  refer_if_set_size_over: 1          # more than one plausible label -> refer
+
+explain:
+  attention_in_region_min: 0.5       # below this the explanation is flagged unreliable
+
+# Classification tasks the code knows how to build from the manifest.
+tasks:
+  keratitis:
+    dataset: infectious_keratitis
+    region: cornea
+    classes: [BK, FK, HSK, other_corneal_abnormalities]
+    split: cross_site                # train/val on ZEH, test on AGEH
+    test_site: AGEH
+  ulcer_pattern:
+    dataset: sustech_sysu
+    region: cornea
+    label_column: category           # 0 point-like, 1 point-flaky mixed, 2 flaky
+    classes: ["0", "1", "2"]
+    aux_label: grade                 # severity grade 0-4, used by the multitask variant
+    aux_classes: ["0", "1", "2", "3", "4"]
+    split: grouped
+  eye_disease_prototype:
+    dataset: eye_disease_web
+    region: whole_eye
+    classes: [Cataract, Conjunctivitis, Eyelid, Normal, Uveitis]
+    split: grouped                   # web-sourced: prototype only, never a test set for claims
+  trachoma_tf:
+    dataset: trachoma
+    region: conjunctiva
+    label_column: TF
+    classes: ["0", "1"]
+    split: grouped
+
+assistant:
+  model: claude-opus-5-5
+  effort: medium
+  max_tokens: 16000
+  languages: [en, hi, kn, ta, te]

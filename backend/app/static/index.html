@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OcuLens-AI - Eye Screening</title>
+<style>
+  :root { --navy:#1f3a5f; --bg:#f5f7fa; --card:#fff; --muted:#5b6672; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; background:var(--bg); color:#1d2329; }
+  header { background:var(--navy); color:#fff; padding:14px 24px; }
+  header h1 { margin:0; font-size:20px; } header p { margin:2px 0 0; font-size:13px; opacity:.85; }
+  main { max-width:1000px; margin:20px auto; padding:0 16px; display:grid; grid-template-columns:340px 1fr; gap:16px; }
+  .card { background:var(--card); border-radius:10px; padding:16px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  h2 { font-size:15px; margin:0 0 10px; color:var(--navy); }
+  label { display:block; font-size:13px; margin:6px 0; }
+  .sym label { display:inline-flex; gap:6px; width:48%; }
+  button { background:var(--navy); color:#fff; border:0; border-radius:6px; padding:10px 16px; cursor:pointer; width:100%; margin-top:12px; }
+  button:disabled { opacity:.5; cursor:wait; }
+  select, input[type=file] { width:100%; margin-top:4px; }
+  .level { display:inline-block; padding:4px 10px; border-radius:12px; font-weight:600; font-size:13px; }
+  .urgent { background:#f8d4d4; color:#8a1f1f; } .soon { background:#fdebc8; color:#7a4b00; }
+  .refer { background:#e6dcf3; color:#4b2a7a; } .routine { background:#d9f0dc; color:#1e5a2a; }
+  .imgs { display:flex; gap:10px; flex-wrap:wrap; } .imgs img { width:220px; border-radius:6px; }
+  table { border-collapse:collapse; width:100%; font-size:13px; } td,th { border-bottom:1px solid #e3e7ec; padding:6px; text-align:left; }
+  .muted { color:var(--muted); font-size:12px; } .assistant { white-space:pre-wrap; line-height:1.5; }
+  @media (max-width:760px){ main { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>OcuLens-AI</h1>
+  <p>Anterior eye screening from clinical images - decision support only, not a diagnosis.</p>
+</header>
+<main>
+  <section class="card">
+    <h2>1. Image</h2>
+    <input id="file" type="file" accept="image/*">
+    <label>Eye <select id="eye"><option value="">not recorded</option><option value="left">left</option><option value="right">right</option></select></label>
+    <h2 style="margin-top:14px">2. Symptoms</h2>
+    <div class="sym" id="sym"></div>
+    <label>Language
+      <select id="lang"><option value="en">English</option><option value="hi">Hindi</option><option value="kn">Kannada</option><option value="ta">Tamil</option><option value="te">Telugu</option></select>
+    </label>
+    <button id="go">Analyse</button>
+    <p class="muted" id="health"></p>
+  </section>
+  <section class="card" id="out"><h2>Result</h2><p class="muted">Upload a slit-lamp or clinic-camera image of the front of the eye.</p></section>
+</main>
+<script>
+const SYMPTOMS = ["pain","blurred_vision","sudden_vision_loss","vision_drop","redness","discharge","diabetes","recent_eye_surgery","eye_injury","chemical_exposure"];
+const symDiv = document.getElementById("sym");
+SYMPTOMS.forEach(s => { const l = document.createElement("label");
+  l.innerHTML = `<input type="checkbox" value="${s}"> ${s.replaceAll("_"," ")}`; symDiv.appendChild(l); });
+
+fetch("/health").then(r => r.json()).then(h => {
+  document.getElementById("health").textContent = h.model_loaded
+    ? `Model: ${h.model.task} (${h.model.backbone})` : "No trained model loaded yet - quality check and symptom triage only.";
+});
+
+function esc(s){ return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+document.getElementById("go").onclick = async () => {
+  const f = document.getElementById("file").files[0];
+  if (!f) { alert("Choose an image first."); return; }
+  const sym = {}; symDiv.querySelectorAll("input").forEach(i => sym[i.value] = i.checked);
+  const fd = new FormData();
+  fd.append("image", f); fd.append("symptoms", JSON.stringify(sym));
+  fd.append("eye", document.getElementById("eye").value); fd.append("language", document.getElementById("lang").value);
+  const btn = document.getElementById("go"); btn.disabled = true; btn.textContent = "Analysing...";
+  try {
+    const r = await fetch("/analyze", { method:"POST", body:fd });
+    if (!r.ok) throw new Error(await r.text());
+    render(await r.json(), URL.createObjectURL(f));
+  } catch (e) { document.getElementById("out").innerHTML = `<h2>Error</h2><p>${esc(e.message)}</p>`; }
+  btn.disabled = false; btn.textContent = "Analyse";
+};
+
+function render(d, src) {
+  const rep = d.report, t = rep.triage;
+  const rows = rep.findings.map(f => `<tr><td>${esc(f.region)}</td><td>${esc(f.condition)}</td>
+    <td>${(f.probability*100).toFixed(0)}%</td><td>${esc(f.prediction_set.join(", "))}</td>
+    <td>${esc(f.uncertainty)}</td><td>${f.attention_in_region ?? "n/a"}</td></tr>`).join("");
+  const q = rep.quality;
+  document.getElementById("out").innerHTML = `
+    <h2>Result <span class="level ${esc(t.level)}">${esc(t.level.toUpperCase())}</span></h2>
+    <p>${esc(t.advice)}</p>
+    <p class="muted">${esc(t.reasons.join(" | "))}</p>
+    <div class="imgs"><img src="${src}" alt="input image">
+      ${d.overlay_png_base64 ? `<img src="data:image/png;base64,${d.overlay_png_base64}" alt="heatmap">` : ""}</div>
+    <h2 style="margin-top:14px">Findings</h2>
+    ${rows ? `<table><tr><th>Region</th><th>Condition</th><th>Prob.</th><th>Prediction set</th><th>Uncertainty</th><th>Attention in region</th></tr>${rows}</table>`
+           : `<p class="muted">No model findings.</p>`}
+    <p class="muted">Image quality: ${q.ok ? "accepted" : "rejected - " + esc(q.prompts.join(" "))}</p>
+    <h2 style="margin-top:14px">Explanation for the patient</h2>
+    <div class="assistant">${esc(d.assistant.text)}</div>
+    <p class="muted">Source: ${esc(d.assistant.source)} ${esc(d.assistant.note || "")}</p>`;
+}
+</script>
+</body>
+</html>
