@@ -44,6 +44,42 @@ the portal database and patient photos. See `scripts/` and `src/oculens/training
 Translations into Hindi, Kannada, Tamil and Telugu are machine-made (Meta NLLB-200) plus hand-written interface
 labels, and still need review by native speakers.
 
+## Model block diagram
+
+```mermaid
+flowchart LR
+    A["Eye photo<br/>(guided camera or upload)"] --> B{"Eye check<br/>(distance to 903 real eye photos)"}
+    B -- "not an eye" --> X["Rejected:<br/>please retake"]
+    B -- "eye" --> C["Image-quality gate<br/>blur · exposure · glare"]
+    C --> D["Pre-processing<br/>glare removal · CLAHE · resize 224 px"]
+    D --> E["U-Net<br/>cornea segmentation"]
+    E --> F["EfficientNet-B0 classifier<br/>keratitis (4) · ulcer pattern (3) · trachoma TF (2)"]
+    G["DDPM synthetic images<br/>(rare keratitis classes)"] -. "training data" .-> F
+    F --> H["Temperature scaling<br/>calibrated probabilities"]
+    F --> I["10-model deep ensemble<br/>disagreement (mutual information)"]
+    H --> J["Conformal prediction set<br/>95% coverage"]
+    J --> K{"Referral gate<br/>more than 1 label in set<br/>or top probability below 0.5"}
+    I --> K
+    K -- "unsure" --> R["REFER to an eye specialist<br/>+ nearest Bengaluru hospitals"]
+    K -- "confident" --> S["Screening result<br/>(never a diagnosis)"]
+    F --> L["Grad-CAM++ heat-map<br/>+ check that it lies on the cornea"]
+    L --> S
+    R --> O["Case saved · PDF report · doctor review<br/>multilingual voice assistant"]
+    S --> O
+```
+
+| Block | Model / method | Role |
+|---|---|---|
+| Eye check | Feature distance to 903 reference eye photos | Refuses images that are not an eye before any prediction |
+| Quality gate | Blur, exposure, glare and contrast tests | Asks for a retake instead of judging a poor photo |
+| Segmentation | U-Net | Outlines the cornea, the region these diseases affect |
+| Classifier | EfficientNet-B0 (ImageNet pre-trained), one per task | Scores each condition; keratitis model trained with diffusion (DDPM) images of rare classes |
+| Calibration | Temperature scaling | Makes the confidence honest |
+| Conformal prediction | Split conformal, alpha = 0.05 | Lists every condition the model cannot rule out (95% coverage) |
+| Uncertainty | 10-model deep ensemble, mutual information | Flags images the models disagree on |
+| Referral gate | Prediction-set size, confidence | Uncertain cases are referred, never reported as normal |
+| Explanation | Grad-CAM++ with a cornea-region check | Shows where the model looked |
+
 ## Pipeline
 
 ```
