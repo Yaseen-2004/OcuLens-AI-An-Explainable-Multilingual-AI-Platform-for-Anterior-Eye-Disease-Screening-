@@ -1,6 +1,6 @@
 # Patient / research data never goes into git
-datasets/
-data/
+/datasets/
+/data/
 *.zip
 *.tar
 
@@ -33,9 +33,9 @@ Thumbs.db
 
 # Generated outputs
 experiments/dryrun/
-data/synthetic/
-data/harmonized/
-data/masks/
+/data/synthetic/
+/data/harmonized/
+/data/masks/
 models/exported/
 
 # Portal runtime data: patient records, photos, password hashes and the voice cache stay local
