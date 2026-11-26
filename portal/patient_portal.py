@@ -352,9 +352,10 @@ def _check_one(ctx, u, pid, img, task, eye, idx):
         return
     refer = bool(res["refer"])
     kind = "refer" if refer else "routine"
-    head, body = pc.RESULT_PLAIN[kind]
+    head, body = pc.RESULT_PLAIN["normal" if res.get("normal") else kind]
     label = ctx.label_of(task, res["top"])
-    detail = (f"{T('Closest pattern the model found')}: <b>{esc(label)}</b> ({res['topp'] * 100:.0f}%)"
+    detail = (f"{T('Healthy-eye score')}: <b>{res['topp'] * 100:.0f}%</b>" if res.get("normal") else
+              f"{T('Closest pattern the model found')}: <b>{esc(label)}</b> ({res['topp'] * 100:.0f}%)"
               if not (task == "trachoma_tf" and res["top"] == "0") else "")
     st.markdown(f"<div class='pp-result {kind}'><div class='big'><div class='dot'></div><div><h3>{esc(T(head))}</h3>"
                 f"<div>{esc(T(body))}</div><div style='margin-top:8px;font-size:.9rem'>{detail}</div></div></div></div>",
@@ -365,7 +366,7 @@ def _check_one(ctx, u, pid, img, task, eye, idx):
     Image.fromarray(img).save(db.STORAGE / fn)
     cid = db.add_case(pid, task, fn, res["top"], res["topp"], ", ".join(res["pset"]), refer, res["q"].ok,
                       u["name"], mi=res["mi"], eye=eye, source="self")
-    if refer and pid:
+    if refer and pid and not res.get("normal"):
         due = (dt.date.today() + dt.timedelta(days=2)).isoformat()
         db.add_reminder(pid, T("Visit an eye specialist"), due, "referral")
     ctx.play_sound("confirm")

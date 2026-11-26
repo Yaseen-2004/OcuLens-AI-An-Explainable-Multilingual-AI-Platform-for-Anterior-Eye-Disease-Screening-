@@ -65,3 +65,4 @@ build_worker/
 !models/checkpoints/unet_cornea.pt
 !models/checkpoints/eye_reference.npz
 !models/checkpoints/ddpm_keratitis_64.pt
+!models/checkpoints/normal_gate.npz

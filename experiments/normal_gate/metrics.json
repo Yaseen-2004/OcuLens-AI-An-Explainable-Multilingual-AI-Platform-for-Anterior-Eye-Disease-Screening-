@@ -1,0 +1,52 @@
+{
+ "C": 10.0,
+ "threshold": 0.8785993638312734,
+ "thumb_side": 56,
+ "max_false_normal_hard": 0.005,
+ "hard_negatives_for_threshold": 1323,
+ "n": {
+  "train": 2824,
+  "val": 958,
+  "test": 961,
+  "healthy_test": 129,
+  "diseased_test": 832
+ },
+ "test_auroc": 0.9988539803220036,
+ "test_auroc_same_source": 0.9970751890426595,
+ "healthy_called_normal": 0.8992248062015504,
+ "diseased_called_normal": 0.002403846153846154,
+ "diseased_called_normal_by_source": {
+  "infectious_keratitis": {
+   "n": 287,
+   "rate": 0.0
+  },
+  "nuclear_cataract": {
+   "n": 65,
+   "rate": 0.0
+  },
+  "slitlamp_temporal": {
+   "n": 12,
+   "rate": 0.0
+  },
+  "sustech_sysu": {
+   "n": 142,
+   "rate": 0.0
+  },
+  "web_cataract": {
+   "n": 108,
+   "rate": 0.018518518518518517
+  },
+  "web_conjunctivitis": {
+   "n": 71,
+   "rate": 0.0
+  },
+  "web_eyelid": {
+   "n": 104,
+   "rate": 0.0
+  },
+  "web_uveitis": {
+   "n": 43,
+   "rate": 0.0
+  }
+ }
+}

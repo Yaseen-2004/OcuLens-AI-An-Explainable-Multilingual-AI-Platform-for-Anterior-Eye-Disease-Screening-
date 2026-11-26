@@ -14,7 +14,8 @@ on an ordinary laptop.
 
 - **Screening:** EfficientNet-B0 classifiers (keratitis type, corneal-ulcer pattern, trachoma TF), U-Net cornea
   segmentation, diffusion-augmented training for rare keratitis classes, calibrated confidence, conformal
-  prediction sets, 10-model ensemble uncertainty, Grad-CAM++ heat-maps, eye / image-quality gates, and a referral
+  prediction sets, 10-model ensemble uncertainty, Grad-CAM++ heat-maps, eye / image-quality gates, a normal-eye
+  check (reports "no signs of disease" only when confident: 0.24% of diseased test eyes called normal), and a referral
   rule that never reports an uncertain case as normal.
 - **Doctor portal:** layer-by-layer screening, guided two-eye camera capture, review queue and recommendations,
   PDF reports, appointment calendar per doctor, eye-drop schedules with adherence, referral follow-up
@@ -52,7 +53,9 @@ flowchart TD
     B -- "not an eye" --> X["Rejected:<br/>please retake"]
     B -- "eye" --> C["Image-quality gate<br/>blur · exposure · glare"]
     C --> D["Pre-processing<br/>glare removal · CLAHE · resize 224 px"]
-    D --> E["U-Net<br/>cornea segmentation"]
+    D --> N{"Normal-eye check<br/>(healthy vs diseased, thumbnail features)"}
+    N -- "confidently healthy" --> NO["No signs of disease found<br/>(routine; see a doctor if symptoms)"]
+    N -- "otherwise" --> E["U-Net<br/>cornea segmentation"]
     E --> F["EfficientNet-B0 classifier<br/>keratitis (4) · ulcer pattern (3) · trachoma TF (2)"]
     G["DDPM synthetic images<br/>(rare keratitis classes)"] -. "training data" .-> F
     F --> H["Temperature scaling<br/>calibrated probabilities"]
@@ -72,6 +75,7 @@ flowchart TD
 |---|---|---|
 | Eye check | Feature distance to 903 reference eye photos | Refuses images that are not an eye before any prediction |
 | Quality gate | Blur, exposure, glare and contrast tests | Asks for a retake instead of judging a poor photo |
+| Normal-eye check | Logistic head on EfficientNet features, resolution-equalised thumbnails | Reports a healthy eye only above a strict threshold (test: 89.9% of healthy eyes, 0.24% of diseased eyes called normal) |
 | Segmentation | U-Net | Outlines the cornea, the region these diseases affect |
 | Classifier | EfficientNet-B0 (ImageNet pre-trained), one per task | Scores each condition; keratitis model trained with diffusion (DDPM) images of rare classes |
 | Calibration | Temperature scaling | Makes the confidence honest |

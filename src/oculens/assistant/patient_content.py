@@ -74,6 +74,9 @@ RESULT_PLAIN = {
     "routine": ("No urgent signs found",
                 "The model did not find strong signs that need urgent care. A doctor will still review your photo. "
                 "If your eye is painful, red or blurry, please see an eye doctor anyway."),
+    "normal": ("No signs of disease found",
+               "Your eye looks healthy in this photo. A doctor will still review it. If you have pain, redness, "
+               "blurred vision or pain in bright light, please see an eye doctor anyway."),
     "pending": ("A doctor will review this", "Your photo has been saved and added to the doctor's review list."),
 }
 

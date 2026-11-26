@@ -56,7 +56,13 @@ TASK_NAME = {v: k for k, v in TASKS.items()}
 SAMPLE_FILE = {"keratitis": "keratitis_sample.jpg", "ulcer_pattern": "ulcer_sample.jpg", "trachoma_tf": "trachoma_sample.jpg"}
 
 
+NORMAL = "NORMAL"
+NORMAL_TEXT = "No signs of disease (healthy-looking eye)"
+
+
 def label_of(task, c):
+    if c == NORMAL:
+        return NORMAL_TEXT
     return TF_LABELS.get(c, c) if task == "trachoma_tf" else LABELS.get(c, c)
 
 
@@ -307,6 +313,29 @@ def eye_distance(img_rgb):
         v = torch.nn.functional.adaptive_avg_pool2d(f, 1).flatten(1)
         v = torch.nn.functional.normalize(v, dim=1).numpy()[0]
     return float(1.0 - (g["ref"] @ v).max()), g["threshold"]
+
+
+@st.cache_resource(show_spinner=False)
+def load_normal_gate():
+    p = CKPT / "normal_gate.npz"
+    g = load_eye_gate()
+    if not p.exists() or g is None:
+        return None
+    z = np.load(p)
+    return {"coef": z["coef"], "intercept": z["intercept"], "threshold": float(z["threshold"]),
+            "image_size": int(z["image_size"]), "model": g["model"]}
+
+
+def normal_check(img_rgb):
+    """Probability that the photo shows a healthy eye, and the threshold above which it is reported as normal.
+    The photo is shrunk to the same thumbnail size as in training (see oculens.quality.normal_gate).
+    Returns (None, None) when the check is unavailable."""
+    from oculens.quality.normal_gate import features, p_normal, thumbnail
+    g = load_normal_gate()
+    if g is None:
+        return None, None
+    f = features(g["model"], [thumbnail(img_rgb)], get_cfg()["preprocessing"], g["image_size"])
+    return float(p_normal(g, f)[0]), g["threshold"]
 
 
 def gradcam_overlay(model, x, disp):
@@ -831,6 +860,18 @@ def _screen_one(img, task, patient_id, eye, idx):
         cls_desc = f"A deep ensemble of {nens} EfficientNet-B0 models reads the cornea and votes on each condition."
     else:
         cls_desc = "EfficientNet-B0 reads the cornea and scores every possible condition."
+    if task == "keratitis":
+        pn, pthr = normal_check(img)
+        if pn is not None:
+            reveal(2, "Step · Normal-eye check",
+                   f"A healthy-vs-diseased model (trained on 649 healthy eyes) scores this photo {pn * 100:.0f}% "
+                   f"healthy; it reports 'normal' only above {pthr * 100:.0f}% and only for a usable photo.",
+                   img, scan_msg="CHECKING FOR A HEALTHY EYE")
+            if pn >= pthr and q.ok:
+                stepbar.empty()
+                holder.empty()
+                _normal_result(img, task, patient_id, eye, idx, pn, pthr)
+                return
     reveal(3, "Step · Classification", cls_desc, img, scan_msg="CLASSIFYING")
     probs, classes, meta, x, model, nmembers, mi = run_inference(img, task)
     reveal(4, "Step · Explanation", "Computing the Grad-CAM++ heat-map and checking it lands on the cornea.", img, scan_msg="GENERATING EXPLANATION")
@@ -910,6 +951,32 @@ def _screen_one(img, task, patient_id, eye, idx):
     st.success(f"Saved as case #{cid}{where}.")
     play_sound("confirm", _sound_on())
     # on_click runs before the next script run, so the click survives the page returning early
+    st.button("Open this case", key=f"open_case_{cid}_{idx}", on_click=_open_case, args=(cid,))
+
+
+def _normal_result(img, task, patient_id, eye, idx, pn, pthr):
+    """Result screen when the normal-eye check is confident the eye looks healthy."""
+    where = f" ({EYE_NAME[eye]})" if eye else ""
+    st.divider()
+    st.markdown("## Final result")
+    c = st.columns([1, 1.25])
+    with c[0]:
+        st.markdown("**Normal-eye check**")
+        st.plotly_chart(gauge_fig(pn * 100, False), use_container_width=True, config=PLOT_CFG, key=f"ngauge_{idx}")
+    with c[1]:
+        st.markdown(f"<div class='soft' style='border-left:6px solid {PAL['green']}'><h3 style='margin:0'>No signs of "
+                    f"disease found</h3><p style='margin:.4rem 0 0'>The photo looks like a healthy eye: normal-eye score "
+                    f"{pn * 100:.1f}% (reported as normal only above {pthr * 100:.1f}%). On held-out test photos this "
+                    f"check called 0.24% of diseased eyes normal.</p><p style='margin:.4rem 0 0;color:#5B7177'>Screening "
+                    f"aid, not a diagnosis: if the patient has pain, redness, blurred vision or light sensitivity, an eye "
+                    f"doctor should still examine them.</p></div>", unsafe_allow_html=True)
+        st.markdown(pill("routine", "ok") + " " + pill("image quality OK", "ok"), unsafe_allow_html=True)
+    fn = f"case_{uuid.uuid4().hex[:10]}.png"
+    Image.fromarray(img).save(db.STORAGE / fn)
+    cid = db.add_case(patient_id, task, fn, NORMAL, pn, NORMAL, False, True, st.session_state["user"]["name"],
+                      mi=0.0, eye=eye)
+    st.success(f"Saved as case #{cid}{where}.")
+    play_sound("confirm", _sound_on())
     st.button("Open this case", key=f"open_case_{cid}_{idx}", on_click=_open_case, args=(cid,))
 
 
@@ -1012,12 +1079,17 @@ def analyse_image(img, task):
     if dist is not None and dist > thr:
         return {"eye_ok": False, "dist": dist, "thr": thr}
     q = assess_quality(img, get_cfg().get("quality"))
+    pn, pthr = normal_check(img) if task == "keratitis" else (None, None)
+    if pn is not None and q.ok and pn >= pthr:      # confident healthy eye (only for usable cornea photos)
+        return {"eye_ok": True, "q": q, "top": NORMAL, "topp": pn, "pset": [NORMAL], "refer": False, "mi": 0.0,
+                "normal": True, "p_normal": pn}
     probs, classes, meta, x, model, nmem, mi = run_inference(img, task)
     o = int(np.argmax(probs))
     top, topp = classes[o], float(probs[o])
     pset = prediction_set(probs, meta.get("conformal_qhat", 1.0), classes)
     refer = should_refer(pset, top_prob=topp, min_top_prob=0.5)
-    return {"eye_ok": True, "q": q, "top": top, "topp": topp, "pset": pset, "refer": refer, "mi": mi}
+    return {"eye_ok": True, "q": q, "top": top, "topp": topp, "pset": pset, "refer": refer, "mi": mi,
+            "normal": False, "p_normal": pn}
 
 
 def page_cases():
