@@ -31,6 +31,35 @@ Held-out balanced accuracy: trachoma 0.81; corneal-ulcer pattern 0.68 (with the 
 image-only model 0.63); infectious keratitis 0.42 on average across four seeds (best model 0.488, four-model
 ensemble 0.474). Test sets are small and single-site: first baselines, not clinical claims.
 
+## Production deployment (v1.0.0)
+
+**Docker (clinic server or private cloud):**
+```
+export OCULENS_ADMIN_PASSWORD='choose-a-long-password'
+docker compose up -d                      # http://localhost:8501; put HTTPS in front for camera and microphone
+```
+The database, photos, logs and voice cache live in the `oculens-data` volume, so updates keep the data. Sign in as
+`admin` with the password above; you are asked to change it straight away.
+
+**Configuration** (environment variable `OCULENS_<NAME>`, or `<name>` in `.streamlit/secrets.toml`; see
+`.streamlit/secrets.toml.example`):
+
+| Setting | Default | Meaning |
+|---|---|---|
+| `DEMO_MODE` | `1` | `1` = demo doctors, patients and cases with the published demo passwords; `0` = production |
+| `ADMIN_PASSWORD` | (none) | First admin's password in production (a random one is written to the log if unset) |
+| `ORG_NAME`, `ORG_TAGLINE`, `SUPPORT_PHONE`, `SUPPORT_EMAIL` | OcuLens-AI | Branding; also editable on the admin's *System & branding* page |
+| `SESSION_TIMEOUT_MIN` | `30` | Idle minutes before sign-out |
+| `MAX_LOGIN_ATTEMPTS`, `LOCKOUT_MIN` | `5`, `15` | Account lockout after wrong passwords |
+| `DATA_DIR` | portal folder | Where the database, photos and logs are kept |
+| `ANTHROPIC_API_KEY` | (none) | Optional online assistant |
+
+**Security and privacy built in:** salted PBKDF2 passwords, account lockout, idle sign-out, audit log, error
+reference numbers with server-side logs, consent records, patient data download and account deletion, admin
+backups. See [docs/PRODUCTION_READINESS.md](docs/PRODUCTION_READINESS.md) for what is done and what a clinic still
+needs before real clinical use (clinical validation, CDSCO registration, legal review, hosting), and
+[CHANGELOG.md](CHANGELOG.md) for the release notes.
+
 ## Running the portal
 
 ```
@@ -38,7 +67,7 @@ pip install -r requirements.txt
 python -m streamlit run portal/app.py        # then open http://localhost:8501
 ```
 
-Demo logins: doctor `dr.yaseen / doctor123`, patient `ravi / patient123`, admin `admin / admin123`.
+Demo logins (demo mode only): doctor `dr.yaseen / doctor123`, patient `ravi / patient123`, admin `admin / admin123`. Never use demo mode with real patients.
 
 Not in this repository (by design): the datasets (public, but large and licence-bound), trained model weights,
 the portal database and patient photos. See `scripts/` and `src/oculens/training/` to rebuild them.

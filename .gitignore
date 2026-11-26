@@ -66,3 +66,8 @@ build_worker/
 !models/checkpoints/eye_reference.npz
 !models/checkpoints/ddpm_keratitis_64.pt
 !models/checkpoints/normal_gate.npz
+
+# Real secrets and runtime logs never go to git
+.streamlit/secrets.toml
+logs/
+portal/logs/

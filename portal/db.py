@@ -2,25 +2,57 @@
 from __future__ import annotations
 
 import hashlib
+import hmac
+import json
+import secrets
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
+import settings
+
 ROOT = Path(__file__).resolve().parent
-DB_PATH = ROOT / "oculens.db"
-STORAGE = ROOT / "storage"
+DATA = settings.data_dir()                    # OCULENS_DATA_DIR in production (a mounted volume)
+DB_PATH = DATA / "oculens.db"
+STORAGE = DATA / "storage"
 STORAGE.mkdir(exist_ok=True)
 
 
 def _conn():
-    c = sqlite3.connect(DB_PATH, check_same_thread=False)
+    c = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=15)
     c.row_factory = sqlite3.Row
     c.execute("PRAGMA foreign_keys = ON")
+    c.execute("PRAGMA busy_timeout = 15000")
     return c
 
 
+# ---- passwords: PBKDF2-SHA256 with a per-user salt; old unsalted hashes are upgraded at the next login
+_PBKDF2_ROUNDS = 260_000
+
+
 def hash_pw(pw: str) -> str:
+    salt = secrets.token_hex(16)
+    dk = hashlib.pbkdf2_hmac("sha256", pw.encode(), salt.encode(), _PBKDF2_ROUNDS).hex()
+    return f"pbkdf2_sha256${_PBKDF2_ROUNDS}${salt}${dk}"
+
+
+def _legacy_hash(pw: str) -> str:
     return hashlib.sha256(("oculens$" + pw).encode()).hexdigest()
+
+
+def verify_pw(pw: str, stored: str) -> bool:
+    if stored and stored.startswith("pbkdf2_sha256$"):
+        _, rounds, salt, dk = stored.split("$", 3)
+        calc = hashlib.pbkdf2_hmac("sha256", pw.encode(), salt.encode(), int(rounds)).hex()
+        return hmac.compare_digest(calc, dk)
+    return hmac.compare_digest(_legacy_hash(pw), stored or "")
+
+
+def _public(row) -> dict:
+    """A user record without secrets, safe to keep in the session."""
+    d = dict(row)
+    d.pop("password_hash", None)
+    return d
 
 
 def now() -> str:
@@ -29,6 +61,7 @@ def now() -> str:
 
 def init_db():
     c = _conn()
+    c.execute("PRAGMA journal_mode = WAL")       # readers do not block the writer
     c.executescript(
         """
         CREATE TABLE IF NOT EXISTS users (
@@ -89,29 +122,83 @@ def init_db():
         """
     )
     _ensure_feature_tables(c)
-    # seed demo users once
+    # production columns and tables
+    ucols = [r[1] for r in c.execute("PRAGMA table_info(users)").fetchall()]
+    for col, typ in (("failed_attempts", "INTEGER DEFAULT 0"), ("locked_until", "TEXT DEFAULT ''"),
+                     ("consent_at", "TEXT DEFAULT ''"), ("last_login", "TEXT DEFAULT ''"),
+                     ("must_change_password", "INTEGER DEFAULT 0")):
+        if col not in ucols:
+            c.execute(f"ALTER TABLE users ADD COLUMN {col} {typ}")
+    c.executescript(
+        """
+        CREATE TABLE IF NOT EXISTS audit_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT, username TEXT, role TEXT, action TEXT, target TEXT,
+            detail TEXT);
+        CREATE TABLE IF NOT EXISTS app_settings (key TEXT PRIMARY KEY, value TEXT);
+        CREATE INDEX IF NOT EXISTS ix_cases_patient ON cases(patient_id);
+        CREATE INDEX IF NOT EXISTS ix_cases_status ON cases(status);
+        CREATE INDEX IF NOT EXISTS ix_appt_patient ON appointments(patient_id);
+        CREATE INDEX IF NOT EXISTS ix_appt_case ON appointments(case_id);
+        CREATE INDEX IF NOT EXISTS ix_audit_at ON audit_log(at);
+        """
+    )
+    # first accounts: demo team in demo mode; otherwise a single admin
     if c.execute("SELECT COUNT(*) FROM users").fetchone()[0] == 0:
-        seed = [
-            ("admin", "admin123", "Administrator", "admin"),
-            ("dr.yaseen", "doctor123", "Dr. Syed Mohammed Yaseen", "doctor"),
-            ("dr.ayaan", "doctor123", "Dr. Mohammed Ayaan", "doctor"),
-            ("dr.arfath", "doctor123", "Dr. Arfath Khan", "doctor"),
-        ]
-        for u, p, n, r in seed:
-            c.execute("INSERT INTO users (username, password_hash, name, role, created_at) VALUES (?,?,?,?,?)",
-                      (u, hash_pw(p), n, r, now()))
+        if settings.flag("demo_mode"):
+            seed = [
+                ("admin", "admin123", "Administrator", "admin"),
+                ("dr.yaseen", "doctor123", "Dr. Syed Mohammed Yaseen", "doctor"),
+                ("dr.ayaan", "doctor123", "Dr. Mohammed Ayaan", "doctor"),
+                ("dr.arfath", "doctor123", "Dr. Arfath Khan", "doctor"),
+            ]
+            for u, p, n, r in seed:
+                c.execute("INSERT INTO users (username, password_hash, name, role, created_at) VALUES (?,?,?,?,?)",
+                          (u, hash_pw(p), n, r, now()))
+        else:
+            pw = settings.get("admin_password")
+            generated = not pw
+            pw = pw or secrets.token_urlsafe(12)
+            c.execute("INSERT INTO users (username, password_hash, name, role, created_at, must_change_password) "
+                      "VALUES (?,?,?,?,?,?)", ("admin", hash_pw(pw), "Administrator", "admin", now(), 1))
+            if generated:   # shown once in the server log; the admin must change it at first sign-in
+                import logging
+                logging.getLogger("oculens").warning("First admin account created: username 'admin', temporary "
+                                                     "password %s (set OCULENS_ADMIN_PASSWORD to choose it)", pw)
     c.commit()
     c.close()
 
 
 # ---- auth
-def check_login(username: str, password: str):
+def login(username: str, password: str):
+    """(user or None, message). Locks the account for a while after repeated wrong passwords."""
     c = _conn()
-    row = c.execute("SELECT * FROM users WHERE username=?", (username,)).fetchone()
-    c.close()
-    if row and row["password_hash"] == hash_pw(password):
-        return dict(row)
-    return None
+    try:
+        row = c.execute("SELECT * FROM users WHERE username=?", (username,)).fetchone()
+        if not row:
+            return None, "Invalid username or password."
+        if row["locked_until"] and row["locked_until"] > now():
+            return None, f"Too many wrong passwords. This account is locked until {row['locked_until']}."
+        if not verify_pw(password, row["password_hash"]):
+            n = (row["failed_attempts"] or 0) + 1
+            lock = ""
+            if n >= settings.number("max_login_attempts"):
+                lock = (datetime.now() + timedelta(minutes=settings.number("lockout_min"))).strftime("%Y-%m-%d %H:%M")
+                n = 0
+            c.execute("UPDATE users SET failed_attempts=?, locked_until=? WHERE id=?", (n, lock, row["id"]))
+            c.commit()
+            return None, ("Too many wrong passwords. The account is locked for "
+                          f"{settings.number('lockout_min')} minutes." if lock else "Invalid username or password.")
+        new_hash = row["password_hash"] if row["password_hash"].startswith("pbkdf2_sha256$") else hash_pw(password)
+        c.execute("UPDATE users SET failed_attempts=0, locked_until='', last_login=?, password_hash=? WHERE id=?",
+                  (now(), new_hash, row["id"]))
+        c.commit()
+        return _public(c.execute("SELECT * FROM users WHERE id=?", (row["id"],)).fetchone()), "ok"
+    finally:
+        c.close()
+
+
+def check_login(username: str, password: str):
+    return login(username, password)[0]
 
 
 def list_users():
@@ -291,12 +378,12 @@ def register_patient(username, password, name, age, sex, phone="", lang="en"):
         cur = c.execute("INSERT INTO patients (mrn, name, age, sex, notes, created_at) VALUES (?,?,?,?,?,?)",
                         ("", name.strip(), int(age), sex, "self-registered", now()))
         pid = cur.lastrowid
-        c.execute("INSERT INTO users (username, password_hash, name, role, created_at, patient_id, phone, lang) "
-                  "VALUES (?,?,?,?,?,?,?,?)", (username, hash_pw(password), name.strip(), "patient", now(), pid,
-                                               phone, lang))
+        c.execute("INSERT INTO users (username, password_hash, name, role, created_at, patient_id, phone, lang, "
+                  "consent_at) VALUES (?,?,?,?,?,?,?,?,?)", (username, hash_pw(password), name.strip(), "patient",
+                                                             now(), pid, phone, lang, now()))
         c.commit()
         row = c.execute("SELECT * FROM users WHERE username=?", (username,)).fetchone()
-        return dict(row), "Account created."
+        return _public(row), "Account created."
     finally:
         c.close()
 
@@ -330,7 +417,7 @@ def login_for_patient(patient_id):
 
 def get_user(uid):
     c = _conn(); row = c.execute("SELECT * FROM users WHERE id=?", (uid,)).fetchone(); c.close()
-    return dict(row) if row else None
+    return _public(row) if row else None
 
 
 def update_profile(uid, phone=None, lang=None, age=None, sex=None, home_area=None):
@@ -355,11 +442,11 @@ def change_password(uid, old, new):
     c = _conn()
     try:
         u = c.execute("SELECT password_hash FROM users WHERE id=?", (uid,)).fetchone()
-        if not u or u["password_hash"] != hash_pw(old):
+        if not u or not verify_pw(old, u["password_hash"]):
             return False, "The current password is not correct."
         if len(new or "") < 6:
             return False, "The new password needs at least 6 characters."
-        c.execute("UPDATE users SET password_hash=? WHERE id=?", (hash_pw(new), uid)); c.commit()
+        c.execute("UPDATE users SET password_hash=?, must_change_password=0 WHERE id=?", (hash_pw(new), uid)); c.commit()
         return True, "Password changed."
     finally:
         c.close()
@@ -416,6 +503,8 @@ def recommendations_for_patient(patient_id):
 
 def seed_patient_demo():
     """Demo patient login for the fictional seeded patient Ravi Kumar (ravi / patient123)."""
+    if not settings.flag("demo_mode"):
+        return
     c = _conn()
     try:
         if c.execute("SELECT 1 FROM users WHERE username='ravi'").fetchone():
@@ -629,4 +718,145 @@ def referral_status():
         overdue = (state == "Not booked" and days >= 3) or (state == "Booked" and days >= 14)
         out.append({**cs, "state": state, "days": days, "overdue": overdue, "followup": fu})
     c.close()
+    return out
+
+
+# ---- audit log
+def audit(user: dict | None, action: str, target: str = "", detail: str = ""):
+    try:
+        c = _conn()
+        c.execute("INSERT INTO audit_log (at, username, role, action, target, detail) VALUES (?,?,?,?,?,?)",
+                  (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), (user or {}).get("username", "-"),
+                   (user or {}).get("role", "-"), action, str(target), str(detail)[:500]))
+        c.commit(); c.close()
+    except Exception:  # noqa: BLE001  (auditing must never break the portal)
+        pass
+
+
+def audit_rows(limit=500, action=None, username=None):
+    q, args = "SELECT * FROM audit_log WHERE 1=1", []
+    if action:
+        q += " AND action=?"; args.append(action)
+    if username:
+        q += " AND username=?"; args.append(username)
+    q += " ORDER BY id DESC LIMIT ?"; args.append(int(limit))
+    c = _conn(); rows = c.execute(q, args).fetchall(); c.close()
+    return [dict(r) for r in rows]
+
+
+# ---- branding and other admin settings (override the deployment defaults)
+def setting(key: str) -> str:
+    try:
+        c = _conn(); row = c.execute("SELECT value FROM app_settings WHERE key=?", (key,)).fetchone(); c.close()
+        if row and row["value"] not in (None, ""):
+            return row["value"]
+    except Exception:  # noqa: BLE001
+        pass
+    return settings.get(key)
+
+
+def set_setting(key: str, value: str):
+    c = _conn()
+    c.execute("INSERT INTO app_settings (key, value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+              (key, value))
+    c.commit(); c.close()
+
+
+def set_user_active_password(uid, new):
+    c = _conn()
+    c.execute("UPDATE users SET password_hash=?, must_change_password=0, failed_attempts=0, locked_until='' "
+              "WHERE id=?", (hash_pw(new), uid))
+    c.commit(); c.close()
+
+
+# ---- patient data rights (India DPDP Act 2023: access and erasure)
+def export_patient_data(patient_id) -> dict:
+    """Everything stored about one patient, as plain data (photos are listed by file name)."""
+    c = _conn()
+    one = lambda q, *a: [dict(r) for r in c.execute(q, a).fetchall()]   # noqa: E731
+    cases = one("SELECT * FROM cases WHERE patient_id=?", patient_id)
+    ids = [x["id"] for x in cases] or [-1]
+    marks = ",".join("?" * len(ids))
+    meds = one("SELECT * FROM medications WHERE patient_id=?", patient_id)
+    mids = [m["id"] for m in meds] or [-1]
+    data = {
+        "exported_at": now(),
+        "patient": (one("SELECT * FROM patients WHERE id=?", patient_id) or [None])[0],
+        "account": [_public(r) for r in c.execute("SELECT * FROM users WHERE patient_id=?", (patient_id,)).fetchall()],
+        "cases": cases,
+        "doctor_recommendations": one(f"SELECT * FROM recommendations WHERE case_id IN ({marks})", *ids),
+        "appointments": one(f"SELECT * FROM appointments WHERE patient_id=? OR case_id IN ({marks})", patient_id, *ids),
+        "symptom_diary": one("SELECT * FROM symptoms WHERE patient_id=?", patient_id),
+        "reminders": one("SELECT * FROM reminders WHERE patient_id=?", patient_id),
+        "vision_tests": one("SELECT * FROM vision_tests WHERE patient_id=?", patient_id),
+        "eye_drops": meds,
+        "eye_drop_doses": one(f"SELECT * FROM med_doses WHERE med_id IN ({','.join('?' * len(mids))})", *mids),
+    }
+    c.close()
+    return data
+
+
+def export_patient_zip(patient_id) -> bytes:
+    import io
+    import zipfile
+    data = export_patient_data(patient_id)
+    b = io.BytesIO()
+    with zipfile.ZipFile(b, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("my_oculens_data.json", json.dumps(data, indent=2, ensure_ascii=False))
+        for cs in data["cases"]:
+            f = STORAGE / (cs.get("image_path") or "")
+            if cs.get("image_path") and f.exists():
+                z.write(f, f"photos/case_{cs['id']}{f.suffix}")
+    return b.getvalue()
+
+
+def delete_patient(patient_id) -> int:
+    """Erase a patient and everything linked to them, including photos. Returns the number of photos removed."""
+    c = _conn()
+    cases = [dict(r) for r in c.execute("SELECT id, image_path FROM cases WHERE patient_id=?", (patient_id,)).fetchall()]
+    ids = [x["id"] for x in cases] or [-1]
+    marks = ",".join("?" * len(ids))
+    mids = [r["id"] for r in c.execute("SELECT id FROM medications WHERE patient_id=?", (patient_id,)).fetchall()] or [-1]
+    c.execute(f"DELETE FROM med_doses WHERE med_id IN ({','.join('?' * len(mids))})", mids)
+    for t in ("medications", "symptoms", "reminders", "vision_tests"):
+        c.execute(f"DELETE FROM {t} WHERE patient_id=?", (patient_id,))
+    c.execute(f"DELETE FROM recommendations WHERE case_id IN ({marks})", ids)
+    c.execute(f"DELETE FROM referral_followups WHERE case_id IN ({marks})", ids)
+    c.execute(f"DELETE FROM appointments WHERE patient_id=? OR case_id IN ({marks})", (patient_id, *ids))
+    c.execute("DELETE FROM cases WHERE patient_id=?", (patient_id,))
+    c.execute("DELETE FROM users WHERE patient_id=? AND role='patient'", (patient_id,))
+    c.execute("DELETE FROM patients WHERE id=?", (patient_id,))
+    c.commit(); c.close()
+    removed = 0
+    for cs in cases:
+        f = STORAGE / (cs["image_path"] or "")
+        if cs["image_path"] and f.exists():
+            f.unlink()
+            removed += 1
+    return removed
+
+
+# ---- backup
+def backup_bytes() -> bytes:
+    """A consistent copy of the database (SQLite online backup), for the admin to download."""
+    import os
+    import tempfile
+    fd, tmp = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+    try:
+        src, dst = _conn(), sqlite3.connect(tmp)
+        src.backup(dst)
+        dst.close(); src.close()
+        return Path(tmp).read_bytes()
+    finally:
+        Path(tmp).unlink(missing_ok=True)
+
+
+def db_stats() -> dict:
+    c = _conn()
+    out = {t: c.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
+           for t in ("users", "patients", "cases", "appointments", "audit_log")}
+    c.close()
+    out["db_mb"] = round(DB_PATH.stat().st_size / 1e6, 2) if DB_PATH.exists() else 0
+    out["photos"] = len(list(STORAGE.glob("*.png")))
     return out

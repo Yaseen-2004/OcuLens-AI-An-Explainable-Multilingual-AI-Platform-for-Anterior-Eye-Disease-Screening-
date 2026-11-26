@@ -15,7 +15,9 @@ import re
 import ssl
 from pathlib import Path
 
-CACHE = Path(__file__).resolve().parent / "storage" / "tts_cache"
+import settings  # noqa: E402
+
+CACHE = settings.data_dir() / "storage" / "tts_cache"
 
 VOICES = {  # (female, male)
     "en": ("en-IN-NeerjaNeural", "en-IN-PrabhatNeural"),

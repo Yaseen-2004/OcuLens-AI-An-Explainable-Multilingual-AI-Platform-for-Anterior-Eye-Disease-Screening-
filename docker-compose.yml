@@ -1,0 +1,17 @@
+# docker compose up -d   ->  http://localhost:8501   (put HTTPS in front for the camera and microphone)
+services:
+  oculens:
+    build: .
+    image: oculens-ai:1.0.0
+    ports:
+      - "8501:8501"
+    environment:
+      OCULENS_DEMO_MODE: "0"
+      OCULENS_ADMIN_PASSWORD: "${OCULENS_ADMIN_PASSWORD:?set OCULENS_ADMIN_PASSWORD}"
+      OCULENS_ORG_NAME: "${OCULENS_ORG_NAME:-OcuLens-AI}"
+      # ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"     # optional online assistant
+    volumes:
+      - oculens-data:/data          # database, photos, logs and voice cache survive updates
+    restart: unless-stopped
+volumes:
+  oculens-data:

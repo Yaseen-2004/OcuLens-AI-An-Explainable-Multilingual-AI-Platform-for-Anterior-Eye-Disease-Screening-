@@ -1,0 +1,15 @@
+.git
+datasets/
+data/
+experiments/dryrun/
+experiments/runs/
+build_worker/
+build_sources/
+**/__pycache__/
+.pytest_cache/
+portal/storage/
+portal/*.db
+portal/logs/
+*.pptx
+*.pdf
+.streamlit/secrets.toml

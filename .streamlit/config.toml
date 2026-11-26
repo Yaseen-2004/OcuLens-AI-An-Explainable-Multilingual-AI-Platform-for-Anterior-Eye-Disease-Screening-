@@ -8,6 +8,12 @@ font = "sans serif"
 [server]
 headless = true
 runOnSave = false
+maxUploadSize = 25            # MB: eye photos only
+enableXsrfProtection = true
+
+[client]
+toolbarMode = "minimal"       # no developer menu or "Deploy" button for users
+showErrorDetails = false      # errors are logged on the server, users see a reference number
 
 [browser]
 gatherUsageStats = false

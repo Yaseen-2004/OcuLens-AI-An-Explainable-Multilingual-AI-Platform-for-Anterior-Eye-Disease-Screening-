@@ -24,7 +24,27 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import settings  # noqa: E402
 import db  # noqa: E402
+import legal  # noqa: E402
+import logging  # noqa: E402
+from logging.handlers import RotatingFileHandler  # noqa: E402
+
+
+def _setup_logging():
+    """Application log in <data dir>/logs/oculens.log (rotated, 5 x 2 MB); errors never reach users' screens."""
+    log = logging.getLogger("oculens")
+    if not log.handlers:
+        d = settings.data_dir() / "logs"
+        d.mkdir(parents=True, exist_ok=True)
+        h = RotatingFileHandler(d / "oculens.log", maxBytes=2_000_000, backupCount=5, encoding="utf-8")
+        h.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+        log.addHandler(h)
+        log.setLevel(logging.INFO)
+    return log
+
+
+LOG = _setup_logging()
 from eye_capture import eye_capture  # noqa: E402
 from sfx import play as play_sound  # noqa: E402
 import tts  # noqa: E402
@@ -499,11 +519,21 @@ LOGIN_CSS = """
 
 
 def _start_session(user):
+    import datetime as _dt
+    db.audit(user, "login")
+    LOG.info("login %s (%s)", user.get("username"), user.get("role"))
+    st.session_state["last_active"] = _dt.datetime.now().timestamp()
     st.session_state["user"] = user
     st.session_state["welcome_nonce"] = uuid.uuid4().hex   # greet once per sign-in
     if user.get("role") == "patient" and user.get("lang"):
         st.session_state["ai_lang"] = user["lang"]
     st.rerun()
+
+
+def _legal_expander():
+    org, ph, em = db.setting("org_name"), db.setting("support_phone"), db.setting("support_email")
+    with st.expander("Terms of use · Privacy notice · Medical disclaimer"):
+        st.markdown(legal.disclaimer(org) + legal.privacy(org, ph, em) + legal.terms(org, ph, em))
 
 
 def login_page():
@@ -522,7 +552,7 @@ def login_page():
             "<div><b>Five languages</b><br><span>English, Hindi, Kannada, Tamil and Telugu, by voice.</span></div></div>"
             "<div class='lg-eye'><span class='ring'></span><span class='ring b'></span><span class='ring c'></span>"
             "<span class='iris'></span><span class='pupil'></span><span class='glint'></span><span class='scan'></span></div>"
-            f"<div class='lg-foot'>{TEAM} · Capstone 2026 · research prototype, not a medical device</div></div>",
+            f"<div class='lg-foot'>{TEAM} · v{settings.VERSION} · screening aid, not a medical device</div></div>",
             unsafe_allow_html=True)
     with panel:
         with st.container(key="lg_panel"):
@@ -535,12 +565,20 @@ def login_page():
                     pw = st.text_input("Password", type="password", placeholder="••••••••")
                     ok = st.form_submit_button("Sign in", type="primary", use_container_width=True)
                 if ok:
-                    user = db.check_login(u.strip().lower(), pw) or db.check_login(u.strip(), pw)
+                    name = u.strip()
+                    user, msg = db.login(name.lower(), pw)
+                    if not user and name != name.lower():
+                        user, msg = db.login(name, pw)
                     if user:
                         _start_session(user)
                     else:
-                        st.error("Invalid username or password.")
-                st.caption("Demo: doctor **dr.yaseen / doctor123** · patient **ravi / patient123** · admin **admin / admin123**")
+                        db.audit({"username": name, "role": "-"}, "login_failed", detail=msg)
+                        st.error(msg)
+                _legal_expander()
+                if settings.flag("demo_mode"):
+                    st.caption("Demo: doctor **dr.yaseen / doctor123** · patient **ravi / patient123** · admin **admin / admin123**")
+                sup = " · ".join(x for x in (db.setting("support_phone"), db.setting("support_email")) if x)
+                st.caption("Forgot your password? Ask your clinic administrator" + (f" ({sup})." if sup else "."))
             with t_new:
                 with st.form("signup"):
                     name = st.text_input("Full name")
@@ -554,8 +592,9 @@ def login_page():
                     c2 = st.columns(2)
                     un = c2[0].text_input("Choose a username")
                     p1 = c2[1].text_input("Choose a password (6+ characters)", type="password")
-                    agree = st.checkbox("I understand OcuLens is a screening aid, not a diagnosis, and I agree that my "
-                                        "eye photos are stored for the clinic's doctors to review.")
+                    agree = st.checkbox("I have read the privacy notice and terms below. I understand OcuLens is a "
+                                        "screening aid, not a diagnosis, and I agree that my eye photos and health "
+                                        "details are stored for the clinic's doctors to review.")
                     go = st.form_submit_button("Create my account", type="primary", use_container_width=True)
                 if go:
                     if not name.strip():
@@ -563,8 +602,10 @@ def login_page():
                     elif not agree:
                         st.error("Please tick the consent box to continue.")
                     else:
-                        user, msg = db.register_patient(un, p1, name, age, sex, phone, lang)
+                        user, msg = db.register_patient(un, p1, name, age, sex, phone, lang)  # noqa: E501
                         if user:
+                            db.audit(user, "patient_signup", target=f"patient {user.get('patient_id')}",
+                                     detail="consent recorded")
                             _start_session(user)
                         else:
                             st.error(msg)
@@ -944,6 +985,7 @@ def _screen_one(img, task, patient_id, eye, idx):
     Image.fromarray(img).save(db.STORAGE / fn)
     cid = db.add_case(patient_id, task, fn, top, topp, ", ".join(pset), refer, q.ok, st.session_state["user"]["name"],
                       mi=mi, eye=eye)
+    db.audit(st.session_state["user"], "screening_saved", f"case {cid}", f"{task}: {top} {topp:.2f} refer={bool(refer)}")
 
     st.divider()
     referral_panel(task, refer)
@@ -975,6 +1017,7 @@ def _normal_result(img, task, patient_id, eye, idx, pn, pthr):
     Image.fromarray(img).save(db.STORAGE / fn)
     cid = db.add_case(patient_id, task, fn, NORMAL, pn, NORMAL, False, True, st.session_state["user"]["name"],
                       mi=0.0, eye=eye)
+    db.audit(st.session_state["user"], "screening_saved", f"case {cid}", f"{task}: normal-eye check {pn:.3f}")
     st.success(f"Saved as case #{cid}{where}.")
     play_sound("confirm", _sound_on())
     st.button("Open this case", key=f"open_case_{cid}_{idx}", on_click=_open_case, args=(cid,))
@@ -1132,6 +1175,9 @@ def _case_detail(cid):
     if not case:
         st.error("Case not found.")
         return
+    if st.session_state.get("_audited_view") != cid:          # one entry per opening, not per rerun
+        db.audit(st.session_state["user"], "case_viewed", f"case {cid}")
+        st.session_state["_audited_view"] = cid
     eye_txt = f" · {EYE_NAME[case['eye']]}" if case.get("eye") else ""
     hero(f"Case #{cid}", f"{case['patient_name'] or 'walk-in'}{eye_txt} · {TASK_NAME.get(case['task'], case['task'])} · screened {case['created_at']} by {case['created_by']}")
     st.button("Ask the AI assistant about this case", key=f"askai_{cid}", on_click=_ask_ai, args=(cid,))
@@ -1174,6 +1220,7 @@ def _case_detail(cid):
             txt = st.text_area("Recommendation / plan (treatment, follow-up, referral)")
             if st.form_submit_button("Save recommendation", type="primary"):
                 db.add_recommendation(cid, st.session_state["user"]["name"], dx, txt)
+                db.audit(st.session_state["user"], "recommendation_saved", f"case {cid}", dx)
                 st.success("Saved; case marked reviewed.")
                 st.rerun()
 
@@ -1577,7 +1624,9 @@ def page_appointments_doc():
             c[3].markdown(pill(r["status"], kinds.get(r["status"], "mut")), unsafe_allow_html=True)
             b = c[4].columns(3)
             if r["status"] == "requested" and b[0].button("Confirm", key=f"apc_{r['id']}"):
-                db.set_appointment_status(r["id"], "confirmed"); st.rerun()
+                db.set_appointment_status(r["id"], "confirmed")
+                db.audit(st.session_state["user"], "appointment_confirmed", f"appointment {r['id']}")
+                st.rerun()
             if r["status"] in ("requested", "confirmed") and b[1].button("Decline", key=f"apd_{r['id']}"):
                 db.set_appointment_status(r["id"], "declined"); st.rerun()
             if r["status"] == "confirmed" and b[2].button("Done", key=f"apx_{r['id']}"):
@@ -1587,6 +1636,15 @@ def page_appointments_doc():
 def page_users():
     hero("Users", "Manage portal accounts (admin only).")
     st.dataframe(db.list_users(), use_container_width=True, hide_index=True)
+    with st.expander("Reset a user's password"):
+        with st.form("resetpw"):
+            us = {f"{u['username']} ({u['role']})": u["id"] for u in db.list_users()}
+            who = st.selectbox("User", list(us))
+            npw = st.text_input("New temporary password (8+ characters)", type="password")
+            if st.form_submit_button("Reset password") and len(npw) >= 8:
+                db.set_user_active_password(us[who], npw)
+                db.audit(st.session_state["user"], "password_reset", who)
+                st.success("Password reset; the account is unlocked.")
     with st.form("adduser"):
         c = st.columns(4)
         un = c[0].text_input("Username")
@@ -1596,6 +1654,87 @@ def page_users():
         if st.form_submit_button("Add user", type="primary") and un.strip():
             (st.success("User added.") if db.add_user(un.strip(), pw, nm, role) else st.error("Username exists."))
             st.rerun()
+
+
+def page_audit():
+    hero("Audit log", "Who signed in, viewed or changed what, and when (admin only).")
+    c = st.columns(3)
+    actions = ["All", "login", "login_failed", "case_viewed", "screening_saved", "recommendation_saved",
+               "appointment_confirmed", "patient_signup", "data_export", "account_deleted", "password_reset",
+               "settings_changed", "backup_downloaded", "error"]
+    act = c[0].selectbox("Action", actions)
+    who = c[1].text_input("Username")
+    lim = c[2].number_input("Rows", 50, 5000, 500, step=50)
+    rows = db.audit_rows(int(lim), None if act == "All" else act, who.strip() or None)
+    st.dataframe(rows, use_container_width=True, hide_index=True)
+    if rows:
+        import csv
+        buf = io.StringIO()
+        w = csv.DictWriter(buf, fieldnames=list(rows[0]))
+        w.writeheader(); w.writerows(rows)
+        st.download_button("Download as CSV", buf.getvalue(), file_name="oculens_audit_log.csv", mime="text/csv")
+
+
+def _backup_clicked():
+    db.audit(st.session_state["user"], "backup_downloaded")
+
+
+def page_system():
+    hero("System & branding", "Health of the installation, white-label branding and backups (admin only).")
+    c = st.columns(4)
+    stt = db.db_stats()
+    kpi(c[0], f"v{settings.VERSION}", "Version", "", PAL["teal"])
+    kpi(c[1], stt["users"], "Accounts", "", PAL["iris"])
+    kpi(c[2], stt["cases"], "Cases", "", PAL["amber"])
+    kpi(c[3], f"{stt['db_mb']} MB", "Database", "", PAL["green"])
+    st.write("")
+    left, right = st.columns(2, gap="large")
+    with left:
+        st.markdown("#### Health checks")
+        need = ["keratitis_efficientnet_b0_syn.pt", "ulcer_pattern_efficientnet_b0.pt", "trachoma_tf_efficientnet_b0.pt",
+                "unet_cornea.pt", "eye_reference.npz", "normal_gate.npz"]
+        miss = [n for n in need if not (CKPT / n).exists()]
+        st.markdown((pill("models: all present", "ok") if not miss else pill(f"models missing: {', '.join(miss)}", "refer"))
+                    + " " + pill(f"ensemble members: {len(load_ensemble('keratitis'))}", "mut")
+                    + " " + pill("demo mode ON" if settings.flag("demo_mode") else "production mode", "amber"
+                                 if settings.flag("demo_mode") else "ok")
+                    + " " + pill("Claude online" if ai.has_credentials() else "assistant offline", "mut"),
+                    unsafe_allow_html=True)
+        st.caption(f"Data folder: {settings.data_dir()} · photos: {stt['photos']} · audit entries: {stt['audit_log']}")
+        if st.button("Test the natural cloud voice"):
+            ok = bool(tts.synthesize("OcuLens voice check.", "en", "female", timeout=12))
+            (st.success if ok else st.warning)("Cloud voice reachable." if ok else
+                                               "Cloud voice not reachable: the browser's own voices will be used.")
+        st.download_button("Download a database backup", db.backup_bytes(), on_click=_backup_clicked,
+                           file_name=f"oculens_backup_{time.strftime('%Y%m%d_%H%M')}.db",
+                           mime="application/octet-stream")
+        st.caption("Photos live in the data folder's storage/ directory; back it up together with the database.")
+    with right:
+        st.markdown("#### Branding (white-label)")
+        with st.form("branding"):
+            org = st.text_input("Organisation name", db.setting("org_name"))
+            tag = st.text_input("Tagline", db.setting("org_tagline"))
+            ph = st.text_input("Support phone", db.setting("support_phone"))
+            em = st.text_input("Support email", db.setting("support_email"))
+            if st.form_submit_button("Save branding", type="primary"):
+                for k, v in (("org_name", org), ("org_tagline", tag), ("support_phone", ph), ("support_email", em)):
+                    db.set_setting(k, v.strip())
+                db.audit(st.session_state["user"], "settings_changed", "branding", org)
+                st.success("Saved. The name appears in the sidebar, the sign-in page and the legal pages.")
+                st.rerun()
+        st.caption("Security settings (session timeout, login attempts, lockout, demo mode, admin password) are set "
+                   "with environment variables or Streamlit secrets: see the README.")
+
+
+def page_legal():
+    org, ph, em = db.setting("org_name"), db.setting("support_phone"), db.setting("support_email")
+    hero("Legal & credits", "Terms of use, privacy notice, medical disclaimer, and data and software credits.")
+    t = st.tabs(["Medical disclaimer", "Privacy notice", "Terms of use", "Credits"])
+    t[0].markdown(legal.disclaimer(org))
+    t[1].markdown(legal.privacy(org, ph, em))
+    t[2].markdown(legal.terms(org, ph, em))
+    t[3].markdown(legal.CREDITS)
+    st.caption(f"{org} v{settings.VERSION}. Templates for the prototype: have them reviewed by a lawyer before real use.")
 
 
 def page_about():
@@ -1658,14 +1797,45 @@ def seed_demo():
 
 
 # ============================================================= shell
+st.markdown("<style>[data-testid='stToolbar'],[data-testid='stDecoration'],#MainMenu,footer{visibility:hidden;}</style>",
+            unsafe_allow_html=True)
 inject_css()
 if "user" not in st.session_state:
+    if st.session_state.pop("timed_out", False):
+        st.info("You were signed out after a period of inactivity. Please sign in again.")
     login_page()
     st.stop()
 
+# idle timeout
+_now = time.time()
+if _now - st.session_state.get("last_active", _now) > settings.number("session_timeout_min") * 60:
+    db.audit(st.session_state["user"], "session_timeout")
+    st.session_state.clear()
+    st.session_state["timed_out"] = True
+    st.rerun()
+st.session_state["last_active"] = _now
+
 user = st.session_state["user"]
-seed_demo()
-db.seed_patient_demo()
+if user.get("must_change_password"):            # first sign-in with a temporary password
+    hero("Choose a new password", "Your account uses a temporary password. Please set your own to continue.")
+    with st.form("forcepw"):
+        old = st.text_input("Temporary password", type="password")
+        n1 = st.text_input("New password (8+ characters)", type="password")
+        n2 = st.text_input("Repeat the new password", type="password")
+        if st.form_submit_button("Save and continue", type="primary"):
+            if len(n1) < 8 or n1 != n2:
+                st.error("The new passwords must match and have at least 8 characters.")
+            else:
+                ok, msg = db.change_password(user["id"], old, n1)
+                if ok:
+                    db.audit(user, "password_changed")
+                    st.session_state["user"] = db.get_user(user["id"])
+                    st.rerun()
+                st.error(msg)
+    st.stop()
+if settings.flag("demo_mode"):
+    seed_demo()
+    db.seed_patient_demo()
 if st.session_state.get("pending_lang"):          # language saved on the profile page
     st.session_state["ai_lang"] = st.session_state.pop("pending_lang")
 _initials = "".join(w[0] for w in (user.get("name") or "?").replace("Dr. ", "").split()[:2]).upper()
@@ -1969,6 +2139,9 @@ else:
              "AI assistant": page_assistant, "Image generation": page_imagegen, "Evaluation": page_eval, "About": page_about}
     if user["role"] == "admin":
         PAGES["Users"] = page_users
+        PAGES["Audit log"] = page_audit
+        PAGES["System & branding"] = page_system
+PAGES[pp.T("Legal & credits") if user["role"] == "patient" else "Legal & credits"] = page_legal
 
 names = list(PAGES.keys())
 default = st.session_state.pop("nav", None)
@@ -1995,9 +2168,10 @@ if choice != "Cases":
     st.session_state["view_case"] = None
 st.sidebar.divider()
 if st.sidebar.button("Sign out", use_container_width=True):
+    db.audit(user, "logout")
     st.session_state.clear()
     st.rerun()
-st.sidebar.caption("Capstone 2026 · research prototype,\nnot a medical device.")
+st.sidebar.caption(f"{db.setting('org_name')} · v{settings.VERSION}\nScreening aid, not a medical device.")
 
 # spoken welcome: shown on the first page after sign-in, read aloud once
 if st.session_state.get("welcome_nonce") and st.session_state.get("welcome_on", True):
@@ -2024,4 +2198,13 @@ if st.session_state.get("welcome_nonce") and st.session_state.get("welcome_on", 
             st.session_state["welcome_nonce"] = None
     else:
         st.session_state["welcome_nonce"] = None   # greet only on the first page
-PAGES[choice]()
+try:
+    PAGES[choice]()
+except Exception as _e:  # noqa: BLE001
+    if type(_e).__name__ in ("RerunException", "StopException", "RerunData"):
+        raise                                   # Streamlit's own control flow
+    _ref = uuid.uuid4().hex[:8].upper()
+    LOG.exception("page %s failed (ref %s) for %s", choice, _ref, user.get("username"))
+    db.audit(user, "error", choice, f"ref {_ref}: {type(_e).__name__}")
+    st.error(f"Sorry, something went wrong on this page. Please try again; if it keeps happening, give the "
+             f"administrator this reference: {_ref}.")

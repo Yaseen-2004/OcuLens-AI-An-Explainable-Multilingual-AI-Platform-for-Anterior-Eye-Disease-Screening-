@@ -1189,6 +1189,21 @@ def page_profile(ctx):
         st.markdown(f"<div class='pp-card'>{icon('heart', 20, '#E2664F')} <b>{esc(T('Your privacy'))}</b><br>"
                     f"<span style='font-size:.88rem'>{esc(T('Only you and the clinic doctors can see your photos and results.'))}"
                     "</span></div>", unsafe_allow_html=True)
+        st.write("")
+        if pid:
+            st.markdown(f"**{T('Your data')}**")
+            st.download_button(T("Download all my data"), db.export_patient_zip(pid), file_name="my_oculens_data.zip",
+                               mime="application/zip", use_container_width=True,
+                               on_click=lambda: db.audit(st.session_state["user"], "data_export", f"patient {pid}"))
+            with st.expander(T("Delete my account")):
+                st.warning(T("This permanently deletes your account, photos, results, diary, reminders and "
+                             "appointments. It cannot be undone."))
+                conf = st.text_input(T("Type DELETE to confirm"), key="pp_del_conf")
+                if st.button(T("Delete my account permanently"), type="primary", disabled=conf.strip() != "DELETE"):
+                    n = db.delete_patient(pid)
+                    db.audit(st.session_state["user"], "account_deleted", f"patient {pid}", f"{n} photos erased")
+                    st.session_state.clear()
+                    st.rerun()
 
 
 # ---------------------------------------------------------------- menu
