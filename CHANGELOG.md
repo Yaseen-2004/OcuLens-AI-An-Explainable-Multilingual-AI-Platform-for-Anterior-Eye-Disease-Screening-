@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1 (26 November 2026)
+- Fix: the source package `src/oculens/data` (dataset, manifest and split code) was missing from the
+  repository because an ignore rule for the root `data/` folder also matched it. Automated tests now pass on GitHub.
+
 ## 1.0.0 (26 November 2026): first production-ready release
 
 **Security and operations**

@@ -2,7 +2,7 @@
 services:
   oculens:
     build: .
-    image: oculens-ai:1.0.0
+    image: oculens-ai:1.0.1
     ports:
       - "8501:8501"
     environment:
