@@ -10,6 +10,14 @@ on an ordinary laptop.
 
 **Team:** Syed Mohammed Yaseen, Mohammed Ayaan, Arfath Khan · Capstone 2026
 
+## Contributors
+
+| | Contributor | GitHub |
+|---|---|---|
+| <img src="https://github.com/Yaseen-2004.png?size=80" width="40" alt="Syed Mohammed Yaseen"> | Syed Mohammed Yaseen | [@Yaseen-2004](https://github.com/Yaseen-2004) |
+| <img src="https://github.com/arfathkkhan434-tech.png?size=80" width="40" alt="Arfath Khan"> | Arfath Khan | [@arfathkkhan434-tech](https://github.com/arfathkkhan434-tech) |
+| <img src="https://github.com/ismail504p.png?size=80" width="40" alt="Mohammed Ayaan"> | Mohammed Ayaan | [@ismail504p](https://github.com/ismail504p) |
+
 ## What it does
 
 - **Screening:** EfficientNet-B0 classifiers (keratitis type, corneal-ulcer pattern, trachoma TF), U-Net cornea

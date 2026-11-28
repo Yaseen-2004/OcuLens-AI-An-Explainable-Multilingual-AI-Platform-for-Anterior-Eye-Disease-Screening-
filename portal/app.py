@@ -1797,8 +1797,17 @@ def seed_demo():
 
 
 # ============================================================= shell
-st.markdown("<style>[data-testid='stToolbar'],[data-testid='stDecoration'],#MainMenu,footer{visibility:hidden;}</style>",
-            unsafe_allow_html=True)
+# Production chrome: no developer menu, deploy button or footer (toolbarMode = "minimal" in .streamlit/config.toml
+# removes most of it). The sidebar's open/close button must stay visible: it is the only way back to the menu once
+# the sidebar is closed, and on phones the sidebar starts closed.
+st.markdown("""<style>
+[data-testid='stDecoration'], #MainMenu, footer, [data-testid='stAppDeployButton'], [data-testid='stMainMenu'] {display:none !important;}
+[data-testid='stExpandSidebarButton'], [data-testid='stSidebarCollapsedControl'] {visibility:visible !important; opacity:1 !important;}
+[data-testid='stExpandSidebarButton'] {background:linear-gradient(135deg,#0F7C80,#19A6A2) !important; color:#fff !important;
+  border-radius:12px !important; padding:6px 12px !important; box-shadow:0 4px 14px rgba(15,124,128,.35); width:auto !important;}
+[data-testid='stExpandSidebarButton'] svg, [data-testid='stExpandSidebarButton'] span {color:#fff !important; fill:#fff !important;}
+[data-testid='stExpandSidebarButton']::after {content:"Menu"; font-weight:700; font-size:.9rem; margin-left:6px; color:#fff;}
+</style>""", unsafe_allow_html=True)
 inject_css()
 if "user" not in st.session_state:
     if st.session_state.pop("timed_out", False):
